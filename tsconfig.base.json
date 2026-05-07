@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@weclaws/db": ["./packages/db/src/index.ts"],
+      "@weclaws/shared": ["./packages/shared/src/index.ts"],
+      "@weclaws/shared/managed-skills": ["./packages/shared/src/managed-skills/index.ts"]
+    }
+  }
+}

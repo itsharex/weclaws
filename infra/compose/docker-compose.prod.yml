@@ -1,0 +1,27 @@
+services:
+  sandbox-runtime:
+    build: !reset null
+    image: ghcr.io/baseclaw/weclaws/sandbox-runtime:latest
+    pull_policy: always
+    volumes: !override
+      - ${WECLAWS_DATA_ROOT}/sandbox-user-workspaces:/app/apps/sandbox-runtime/user-workspaces
+      - ${WECLAWS_DATA_ROOT}/instances:/app/storage/instances
+      - ${WECLAWS_DATA_ROOT}/sandbox-runtime-private:/app/storage/sandbox-runtime-private
+
+  supervisor:
+    build: !reset null
+    image: ghcr.io/baseclaw/weclaws/supervisor:latest
+    pull_policy: always
+    volumes: !override
+      - ${WECLAWS_DATA_ROOT}/sqlite:/app/storage/sqlite
+      - ${WECLAWS_DATA_ROOT}/instances:/app/storage/instances
+      - ${WECLAWS_DATA_ROOT}/sandbox-runtime-private:/app/storage/sandbox-runtime-private
+
+  web:
+    build: !reset null
+    image: ghcr.io/baseclaw/weclaws/web:latest
+    pull_policy: always
+    volumes: !override
+      - ${WECLAWS_DATA_ROOT}/sqlite:/app/storage/sqlite
+      - ${WECLAWS_DATA_ROOT}/instances:/app/storage/instances
+      - ${WECLAWS_DATA_ROOT}/sandbox-runtime-private:/app/storage/sandbox-runtime-private

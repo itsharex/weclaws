@@ -1,0 +1,26 @@
+{
+  "name": "weclaws",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @weclaws/web dev",
+    "dev:supervisor": "pnpm --filter @weclaws/supervisor dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "test:fastagent-contract": "pnpm exec vitest --run tests/integration/fastagent-cli-contract.test.ts",
+    "lint": "pnpm run typecheck",
+    "db:generate": "pnpm --filter @weclaws/db db:generate",
+    "db:migrate": "pnpm --filter @weclaws/db db:migrate"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "vitest": "^2.1.9",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "version": "2026-04-15-curated-v6",
+  "skills": [
+    {
+      "name": "agent-browser",
+      "path": "agent-browser",
+      "defaultSync": true,
+      "homepage": "https://github.com/vercel-labs/agent-browser",
+      "emoji": "🌐",
+      "requires": {
+        "bins": [
+          "agent-browser"
+        ]
+      },
+      "install": [
+        {
+          "id": "node",
+          "kind": "node",
+          "package": "agent-browser",
+          "bins": [
+            "agent-browser"
+          ],
+          "label": "Install agent-browser (node)"
+        }
+      ],
+      "source": {
+        "kind": "upstream-curated",
+        "repo": "vercel-labs/agent-browser",
+        "path": "skills/agent-browser"
+      }
+    },
+    {
+      "name": "github",
+      "path": "github",
+      "defaultSync": true,
+      "emoji": "🐙",
+      "requires": {
+        "bins": [
+          "gh"
+        ]
+      },
+      "install": [
+        {
+          "id": "brew",
+          "kind": "brew",
+          "formula": "gh",
+          "bins": [
+            "gh"
+          ],
+          "label": "Install GitHub CLI (brew)"
+        },
+        {
+          "id": "apt",
+          "kind": "apt",
+          "package": "gh",
+          "bins": [
+            "gh"
+          ],
+          "label": "Install GitHub CLI (apt)"
+        }
+      ],
+      "source": {
+        "kind": "upstream-curated",
+        "repo": "steipete/clawdis",
+        "path": "skills/github"
+      }
+    },
+    {
+      "name": "skill-creator",
+      "path": "skill-creator",
+      "defaultSync": true,
+      "emoji": "🛠️",
+      "requires": {
+        "bins": [
+          "python3"
+        ]
+      },
+      "source": {
+        "kind": "upstream-curated",
+        "repo": "steipete/clawdis",
+        "path": "skills/skill-creator"
+      }
+    },
+    {
+      "name": "personal-planner",
+      "path": "personal-planner",
+      "defaultSync": true,
+      "emoji": "🧭",
+      "source": {
+        "kind": "weclaws-curated",
+        "repo": "weclaws",
+        "path": "resources/skills/managed/personal-planner"
+      }
+    },
+    {
+      "name": "video-frames",
+      "path": "video-frames",
+      "defaultSync": true,
+      "homepage": "https://ffmpeg.org",
+      "emoji": "🎬",
+      "requires": {
+        "bins": [
+          "ffmpeg"
+        ]
+      },
+      "install": [
+        {
+          "id": "brew",
+          "kind": "brew",
+          "formula": "ffmpeg",
+          "bins": [
+            "ffmpeg"
+          ],
+          "label": "Install ffmpeg (brew)"
+        }
+      ],
+      "source": {
+        "kind": "upstream-curated",
+        "repo": "steipete/clawdis",
+        "path": "skills/video-frames"
+      }
+    },
+    {
+      "name": "weather",
+      "path": "weather",
+      "defaultSync": true,
+      "homepage": "https://wttr.in/:help",
+      "emoji": "☔",
+      "requires": {
+        "bins": [
+          "curl"
+        ]
+      },
+      "install": [
+        {
+          "id": "brew",
+          "kind": "brew",
+          "formula": "curl",
+          "bins": [
+            "curl"
+          ],
+          "label": "Install curl (brew)"
+        }
+      ],
+      "source": {
+        "kind": "upstream-curated",
+        "repo": "steipete/clawdis",
+        "path": "skills/weather"
+      }
+    }
+  ]
+}

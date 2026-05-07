@@ -1,0 +1,288 @@
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { afterEach, describe, expect, it } from 'vitest';
+import {
+  VIRTUAL_STATE_ROOT,
+  VIRTUAL_WORKSPACE_ROOT,
+  installSessionSecurityOverrides,
+} from '../../../../../infra/sandbox-runtime/workspace-root-override.mjs';
+
+const tempDirs: string[] = [];
+
+afterEach(async () => {
+  await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { force: true, recursive: true })));
+});
+
+describe('sandbox-runtime session security override', () => {
+  it('redacts the outward workspace path and translates virtual cwd roots back to the real bot scope', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'weclaws-sandbox-runtime-session-security-'));
+    tempDirs.push(dir);
+
+    const workspacePath = join(dir, 'instances', 'bot_1', 'workspace');
+    const dataPath = join(dir, 'instances', 'bot_1', 'data');
+    await Promise.all([
+      mkdir(join(workspacePath, 'nested'), { recursive: true }),
+      mkdir(join(dataPath, 'cache'), { recursive: true }),
+    ]);
+
+    class ConfigValidationError extends Error {}
+
+    class FakeSandboxProcessPool {
+      workspaceManager = {
+        getConfig() {
+          return {
+            basePath: join(dir, 'sandbox-workspace'),
+          };
+        },
+      };
+
+      async createSession(..._args: unknown[]) {
+        return {
+          processInfo: {
+            id: 'proc_1',
+          },
+          session: {
+            id: 'session_1',
+            processId: 'proc_1',
+            userId: 'user_1',
+            workspaceId: 'ws_1',
+            workspacePath,
+          },
+        };
+      }
+
+      async resolveCommandCwd(session: { workspacePath: string }, requestedCwd?: string) {
+        return requestedCwd ?? session.workspacePath;
+      }
+
+      getWorkspaceFilesystemRestrictions() {
+        return {
+          allowRead: [],
+          allowWrite: [],
+          denyRead: [],
+          denyWrite: [],
+        };
+      }
+    }
+
+    installSessionSecurityOverrides({
+      ConfigValidationError,
+      SandboxProcessPool: FakeSandboxProcessPool,
+      workspaceMapFile: '/app/storage/sandbox-runtime-private/workspace-map.json',
+    });
+
+    const pool = new FakeSandboxProcessPool();
+    const { session } = await pool.createSession('user_1', 'ws_1');
+
+    expect(session.workspacePath).toBe(VIRTUAL_WORKSPACE_ROOT);
+    await expect(pool.resolveCommandCwd(session, `${VIRTUAL_WORKSPACE_ROOT}/nested`)).resolves.toBe(
+      join(workspacePath, 'nested'),
+    );
+    await expect(pool.resolveCommandCwd(session, `${VIRTUAL_STATE_ROOT}/cache`)).resolves.toBe(
+      join(dataPath, 'cache'),
+    );
+    await expect(
+      pool.resolveCommandCwd(session, join(dir, 'instances', 'bot_2', 'workspace')),
+    ).rejects.toThrow('cwd must stay within the session workspace root');
+  });
+
+  it('recovers the real workspace and state roots for restored sessions that lost internal markers', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'weclaws-sandbox-runtime-session-security-'));
+    tempDirs.push(dir);
+
+    const workspacePath = join(dir, 'instances', 'bot_1', 'workspace');
+    const dataPath = join(dir, 'instances', 'bot_1', 'data');
+    const workspaceMapFile = join(dir, 'sandbox-runtime-private', 'workspace-map.json');
+    await Promise.all([
+      mkdir(join(workspacePath, 'nested'), { recursive: true }),
+      mkdir(join(dataPath, 'cache'), { recursive: true }),
+      mkdir(join(dir, 'sandbox-runtime-private'), { recursive: true }),
+      writeFile(workspaceMapFile, JSON.stringify({
+        updatedAt: new Date('2026-05-07T00:00:00.000Z').toISOString(),
+        version: 1,
+        workspaces: {
+          ws_1: {
+            updatedAt: new Date('2026-05-07T00:00:00.000Z').toISOString(),
+            workspacePath,
+          },
+        },
+      })),
+    ]);
+
+    class ConfigValidationError extends Error {}
+
+    class FakeSandboxProcessPool {
+      workspaceManager = {
+        getConfig() {
+          return {
+            basePath: join(dir, 'sandbox-workspace'),
+          };
+        },
+      };
+
+      async createSession(..._args: unknown[]) {
+        throw new Error('not used');
+      }
+
+      async resolveCommandCwd(session: { workspacePath: string }, requestedCwd?: string) {
+        return requestedCwd ?? session.workspacePath;
+      }
+
+      getWorkspaceFilesystemRestrictions() {
+        return {
+          allowRead: [],
+          allowWrite: [],
+          denyRead: [],
+          denyWrite: [],
+        };
+      }
+    }
+
+    installSessionSecurityOverrides({
+      ConfigValidationError,
+      SandboxProcessPool: FakeSandboxProcessPool,
+      workspaceMapFile,
+    });
+
+    const pool = new FakeSandboxProcessPool();
+    const restoredSession = {
+      id: 'session_1',
+      processId: 'proc_1',
+      userId: 'user_1',
+      workspaceId: 'ws_1',
+      workspacePath: VIRTUAL_WORKSPACE_ROOT,
+    };
+
+    await expect(pool.resolveCommandCwd(restoredSession, `${VIRTUAL_WORKSPACE_ROOT}/nested`)).resolves.toBe(
+      join(workspacePath, 'nested'),
+    );
+    await expect(pool.resolveCommandCwd(restoredSession, `${VIRTUAL_STATE_ROOT}/cache`)).resolves.toBe(
+      join(dataPath, 'cache'),
+    );
+  });
+
+  it('keeps deny-then-allow read restrictions around the current bot workspace and data roots', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'weclaws-sandbox-runtime-session-security-'));
+    tempDirs.push(dir);
+
+    const workspaceBaseRoot = join(dir, 'sandbox-user-workspaces');
+    const basePath = join(workspaceBaseRoot, 'user_1');
+    const storageRoot = join(dir, 'storage');
+    const botWorkspacePath = join(dir, 'storage', 'instances', 'bot_1', 'workspace');
+    const botDataPath = join(dir, 'storage', 'instances', 'bot_1', 'data');
+    const instancesRoot = join(dir, 'storage', 'instances');
+    const privateRoot = join(dir, 'storage', 'sandbox-runtime-private');
+    const workspaceMapFile = join(privateRoot, 'workspace-map.json');
+    const stateRoot = join(basePath, '.runtime', 'user_1', 'ws_1');
+    const metadataRoot = join(basePath, '.runtime-meta', 'user_1', 'ws_1');
+
+    await Promise.all([
+      mkdir(botWorkspacePath, { recursive: true }),
+      mkdir(botDataPath, { recursive: true }),
+      mkdir(stateRoot, { recursive: true }),
+      mkdir(metadataRoot, { recursive: true }),
+      mkdir(privateRoot, { recursive: true }),
+    ]);
+
+    class ConfigValidationError extends Error {}
+
+    class FakeSandboxProcessPool {
+      workspaceManager = {
+        getConfig() {
+          return {
+            basePath,
+          };
+        },
+      };
+
+      async createSession(..._args: unknown[]) {
+        throw new Error('not used');
+      }
+
+      async resolveCommandCwd() {
+        return '';
+      }
+
+      getWorkspaceFilesystemRestrictions(_executionContext?: unknown) {
+        return {
+          allowRead: [],
+          allowWrite: [],
+          denyRead: [],
+          denyWrite: [],
+        };
+      }
+    }
+
+    installSessionSecurityOverrides({
+      ConfigValidationError,
+      SandboxProcessPool: FakeSandboxProcessPool,
+      workspaceMapFile,
+    });
+
+    const pool = new FakeSandboxProcessPool();
+    const restrictions = pool.getWorkspaceFilesystemRestrictions({
+      metadataRoot,
+      stateRoot,
+      workspacePath: botWorkspacePath,
+    });
+
+    expect(restrictions.allowRead).toEqual([
+      botWorkspacePath,
+      botDataPath,
+      stateRoot,
+    ]);
+    expect(restrictions.allowWrite).toEqual([
+      botWorkspacePath,
+      botDataPath,
+      stateRoot,
+    ]);
+    expect(restrictions.denyRead).toEqual(expect.arrayContaining([
+      storageRoot,
+      `${storageRoot}/**`,
+      instancesRoot,
+      `${instancesRoot}/**`,
+      workspaceBaseRoot,
+      `${workspaceBaseRoot}/**`,
+      basePath,
+      `${basePath}/**`,
+      privateRoot,
+      `${privateRoot}/**`,
+    ]));
+    expect(restrictions.denyRead).toEqual(expect.arrayContaining([
+      '/etc/passwd',
+      '/etc/passwd-',
+      '/etc/shadow',
+      '/etc/shadow-',
+      '/etc/group',
+      '/etc/group-',
+      '/etc/gshadow',
+      '/etc/gshadow-',
+      '/proc/self/mountinfo',
+      '/proc/*/mountinfo',
+      '/proc/self/mountstats',
+      '/proc/*/mountstats',
+      '/proc/1/cmdline',
+      '/proc/*/cmdline',
+      '/proc/1/environ',
+      '/proc/*/environ',
+      '/proc/kallsyms',
+    ]));
+    expect(restrictions.denyRead).toContain(workspaceMapFile);
+    expect(restrictions.denyWrite).toEqual(expect.arrayContaining([
+      storageRoot,
+      `${storageRoot}/**`,
+      instancesRoot,
+      `${instancesRoot}/**`,
+      workspaceBaseRoot,
+      `${workspaceBaseRoot}/**`,
+      basePath,
+      `${basePath}/**`,
+      privateRoot,
+      `${privateRoot}/**`,
+      metadataRoot,
+      `${metadataRoot}/**`,
+    ]));
+    expect(restrictions.denyWrite).toContain(workspaceMapFile);
+  });
+});

@@ -1,0 +1,22 @@
+{
+  "name": "@weclaws/db",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@weclaws/shared": "workspace:*",
+    "better-sqlite3": "^11.8.1",
+    "drizzle-orm": "^0.38.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "drizzle-kit": "^0.30.6"
+  },
+  "scripts": {
+    "build": "pnpm exec tsc -p tsconfig.json",
+    "test": "pnpm exec vitest --run",
+    "typecheck": "pnpm exec tsc -p tsconfig.json",
+    "db:generate": "pnpm exec drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "pnpm exec drizzle-kit migrate --config=drizzle.config.ts"
+  }
+}

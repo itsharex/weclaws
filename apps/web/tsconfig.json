@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@weclaws/db": ["../../packages/db/src/index.ts"],
+      "@weclaws/shared": ["../../packages/shared/src/index.ts"],
+      "@weclaws/shared/managed-skills": ["../../packages/shared/src/managed-skills/index.ts"]
+    },
+    "types": ["node", "vitest/globals"],
+    "jsx": "preserve",
+    "plugins": [{ "name": "next" }]
+  },
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

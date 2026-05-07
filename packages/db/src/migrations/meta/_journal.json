@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1775620252903,
+      "tag": "0000_baseline_reset",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1775641547324,
+      "tag": "0001_bootstrap_registration_claims",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1775981028936,
+      "tag": "0002_sleepy_mentallo",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1776416884637,
+      "tag": "0003_llm_profiles_hard_cut",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1776579305553,
+      "tag": "0004_violet_johnny_blaze",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1777691656762,
+      "tag": "0005_optimal_mikhail_rasputin",
+      "breakpoints": true
+    }
+  ]
+}

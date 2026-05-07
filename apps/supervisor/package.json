@@ -1,0 +1,22 @@
+{
+  "name": "@weclaws/supervisor",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fastagent/cli": "0.6.42",
+    "@weclaws/db": "workspace:*",
+    "@weclaws/shared": "workspace:*",
+    "better-sqlite3": "^11.8.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "tsx": "^4.20.5"
+  },
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "dev": "pnpm exec tsx watch src/index.ts",
+    "test": "pnpm exec vitest --run",
+    "typecheck": "pnpm exec tsc -p tsconfig.json"
+  }
+}

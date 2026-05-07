@@ -1,0 +1,3 @@
+export const DEFAULT_RECONCILE_INTERVAL_MS = 2_000;
+export const RESTART_BACKOFF_DELAYS_MS = [5_000, 15_000, 30_000, 60_000] as const;
+export const MAX_CONSECUTIVE_RESTARTS = 4;

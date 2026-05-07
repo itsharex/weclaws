@@ -1,0 +1,29 @@
+{
+  "version": "2026-04-15-curated-v6",
+  "skills": [
+    {
+      "name": "agent-browser",
+      "path": "agent-browser"
+    },
+    {
+      "name": "weather",
+      "path": "weather"
+    },
+    {
+      "name": "github",
+      "path": "github"
+    },
+    {
+      "name": "skill-creator",
+      "path": "skill-creator"
+    },
+    {
+      "name": "video-frames",
+      "path": "video-frames"
+    },
+    {
+      "name": "personal-planner",
+      "path": "personal-planner"
+    }
+  ]
+}
