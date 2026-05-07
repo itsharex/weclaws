@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2026-05-07
+
+### Changed
+
+- Bot 详情页新增基础信息卡片，可直接编辑 Bot 展示名称；保存走 owner-scoped `PATCH /api/bots/[id]`，只更新 `bot_instances.name`，不触发 restart intent，也不修改 LLM profile 或 runtime 快照。
+- `PATCH /api/bots/[id]` 现在只接受 trim 后非空的 `name` 字段，继续复用统一 API envelope、session 校验和 bot owner 校验。
+
 ## 2026-05-04
 
 ### Changed

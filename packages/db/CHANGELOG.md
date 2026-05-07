@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2026-05-07
+
+### Changed
+
+- `BotInstanceRepository` 新增 owner-scoped `updateNameForOwner()` 窄接口，用于 web 修改 Bot 展示名称；该接口只更新 `bot_instances.name / updated_at`，不引入通用 update bag。
+
 ## 2026-05-02
 
 ### Added

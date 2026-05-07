@@ -73,6 +73,12 @@ export interface UpdateBotLlmProfileInput {
   llmProfileId: string;
 }
 
+export interface UpdateBotNameInput {
+  botId: string;
+  ownerUserId: string;
+  name: string;
+}
+
 export async function listBots(ownerUserId: string): Promise<BotSummaryItem[]> {
   const rows = await getRepositories().botInstances.listByOwnerUserId(ownerUserId);
   return rows.map(toBotSummaryItem);
@@ -353,6 +359,25 @@ export async function updateBotLlmProfile(input: UpdateBotLlmProfileInput): Prom
   }
 
   return getBotDetail(input.botId);
+}
+
+export async function updateBotName(input: UpdateBotNameInput): Promise<BotDetailItem> {
+  const bot = await getRepositories().botInstances.updateNameForOwner(
+    input.botId,
+    input.ownerUserId,
+    input.name,
+    new Date(),
+  );
+
+  if (!bot) {
+    throw new ApiError({
+      code: 'NOT_FOUND',
+      message: 'Bot not found.',
+      status: 404,
+    });
+  }
+
+  return hydrateBotDetail(bot);
 }
 
 async function updateDesiredState(botId: string, desiredState: BotDesiredState): Promise<BotDetailItem> {

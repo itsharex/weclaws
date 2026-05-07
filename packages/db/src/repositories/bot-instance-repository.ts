@@ -198,6 +198,18 @@ export class BotInstanceRepository {
     return this.findByIdForOwner(id, ownerUserId);
   }
 
+  async updateNameForOwner(id: string, ownerUserId: string, name: string, updatedAt: Date = new Date()) {
+    this.db.update(botInstances)
+      .set({
+        name,
+        updatedAt,
+      })
+      .where(and(eq(botInstances.id, id), eq(botInstances.ownerUserId, ownerUserId)))
+      .run();
+
+    return this.findByIdForOwner(id, ownerUserId);
+  }
+
   async findReconcileCandidates(now: Date = new Date()) {
     return this.db.select().from(botInstances).where(
       and(

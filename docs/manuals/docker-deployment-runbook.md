@@ -24,7 +24,7 @@
 
 | 镜像 | Dockerfile | 作用 | 关键特征 |
 | --- | --- | --- | --- |
-| `sandbox-runtime` | `infra/docker/sandbox-runtime.Dockerfile` | FastAgent remote sandbox 服务 | 从 `@fastagent/sandbox-runtime` npm 包安装，并通过 repo-local wrapper 对齐真实 bot workspace；额外预装 `agent-browser`、`bun`、`pnpm`、`uv`、`ffmpeg`、`jq`、压缩包工具以及 PDF / `.docx` 文本提取 CLI |
+| `sandbox-runtime` | `infra/docker/sandbox-runtime.Dockerfile` | FastAgent remote sandbox 服务 | 从 `@fastagent/sandbox-runtime` npm 包安装，并通过 repo-local wrapper 对齐真实 bot workspace；额外预装 `agent-browser`、Chromium、`bun`、`pnpm`、`uv`、`gh`、`ffmpeg`、`jq`、压缩包工具以及 PDF / `.docx` 文本提取 CLI；浏览器自动化能力仍在接入中 |
 | `supervisor` | `infra/docker/supervisor.Dockerfile` | 管理 bot 生命周期、收敛状态、自动迁移 DB | 构建阶段 bundle 出 `dist/index.js`，运行层复用 repo-local `@fastagent/cli@0.6.42`，并预装 `curl`、`gh`、`ffmpeg`、`procps` |
 | `web` | `infra/docker/web.Dockerfile` | Next.js UI/API | 使用 Next `standalone` 运行层，并额外保留 `pnpm-workspace.yaml`、`apps/supervisor/package.json`、`resources/skills/managed` 与 `procps`，保证页头 FastAgent CLI 版本 badge 和 owner-scoped `Sync Skills` 接口都能在生产镜像中正常工作 |
 
@@ -42,6 +42,8 @@
 - `ghcr.io/baseclaw/weclaws/web:latest`
 - `ghcr.io/baseclaw/weclaws/supervisor:latest`
 - `ghcr.io/baseclaw/weclaws/sandbox-runtime:latest`
+
+发布新版本时，推送 `v*` tag 会触发 `.github/workflows/docker-images.yml`，自动构建并推送三张镜像。每张镜像都会写入当前 tag（例如 `v0.1.0`）和 `latest` 两个标签，供生产 Compose override 拉取。
 
 ### 2.4 Production Compose Override
 
@@ -176,12 +178,12 @@ WEB_PORT=3000
 - Compose 还会给 supervisor 注入 `SRT_WORKSPACE_MAP_DIR=/app/storage/sandbox-runtime-private/workspace-map`；workspace map 只允许 supervisor 与 sandbox-runtime 通过私有共享卷读写，不再混在 `/app/storage/instances` 根目录里。
 - 当前 Compose 基线会把新用户 pool 默认设为 `SRT_DEFAULT_POOL_SIZE=3`、`SRT_DEFAULT_MIN_READY_PROCESSES=1`、`SRT_DEFAULT_SESSION_TIMEOUT_MS=600000`。
 - sandbox 镜像里额外包含的常用 CLI 基线：
-  - 浏览器自动化：`agent-browser`
+  - 浏览器自动化支持建设中：`agent-browser`、`chromium`
   - JS 运行 / 包管理：`bun`
   - Node 包管理：`pnpm`
   - Python 项目 / 包管理：`uv`
-  - 浏览器内核：`chromium`
   - Python 解释器：`python3`
+  - GitHub CLI：`gh`
   - 媒体处理：`ffmpeg`
   - 数据/文件：`jq`、`zip`、`unzip`、`file`
   - 文本提取：`pdftotext` / `pdfinfo`（来自 `poppler-utils`）、`pandoc`
@@ -260,6 +262,7 @@ docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.yml
 docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.yml exec sandbox-runtime sh -lc 'bun --version'
 docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.yml exec sandbox-runtime sh -lc 'pnpm --version'
 docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.yml exec sandbox-runtime sh -lc 'uv --version'
+docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.yml exec sandbox-runtime sh -lc 'gh --version'
 docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.yml exec sandbox-runtime sh -lc 'ffmpeg -version'
 docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.yml exec sandbox-runtime sh -lc 'pdftotext -v'
 docker compose --env-file infra/compose/.env -f infra/compose/docker-compose.yml exec sandbox-runtime sh -lc 'pandoc --version'

@@ -82,6 +82,7 @@
 - 实例目录必须由 `resolveBotInstancePaths(resolveInstancesRoot(), botId)` 派生，并在写 DB 前创建好目录树
 - `resolveInstancesRoot()` 的解析必须尊重显式 `INSTANCES_ROOT` override；不能再硬编码 `storage/instances`，否则会和 supervisor 漂移
 - 手动 skills 同步不进 `bot-service`；route 直接调用 shared managed skills 引擎，因为它不写 bot 意图，也不触碰 runtime 生命周期
+- Bot 名称编辑统一走 `PATCH /api/bots/[id]` + [`src/lib/bot-service.ts`](./src/lib/bot-service.ts) 的 owner-scoped `updateBotName()`；只允许更新展示名称，不触发 restart intent，不修改 profile 绑定，也不改 `provider / model` runtime 快照
 - bot DTO 显式拆为：
   - `BotSummaryItem`：列表页最小字段
   - `BotDetailItem`：详情页、命令响应、SSE 快照/状态更新字段
@@ -169,6 +170,7 @@
 ## Detail Presentation
 
 - [`src/components/bots/bot-detail-live-view.tsx`](./src/components/bots/bot-detail-live-view.tsx) 继续作为详情页唯一的 EventSource owner，子组件只消费 props，不自行开流
+- [`src/components/bots/bot-basic-info-card.tsx`](./src/components/bots/bot-basic-info-card.tsx) 负责 Bot 展示名称编辑；成功后只更新 live view 的本地 `BotDetailItem`，runtime 状态仍由 SSE/命令响应收敛
 - 详情页头部现在先渲染 bot 身份摘要，再在同一张横向 summary surface 内并排呈现 `当前运行状态` 和 `技术元数据`；不要再把 metadata 作为独立正文卡片放回主工作区
 - 详情页工作区现在固定为“双栏主次结构”：
   - 左栏是 `Bot Controls` complementary region，用于合并后的 `运行概览`、命令按钮和删除入口

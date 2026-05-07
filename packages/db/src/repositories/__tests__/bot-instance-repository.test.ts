@@ -122,6 +122,12 @@ describe('BotInstanceRepository', () => {
         llmConfigId: string,
         updatedAt: Date,
       ): Promise<{ id: string; llmConfigId: string | null } | null>;
+      updateNameForOwner(
+        id: string,
+        ownerUserId: string,
+        name: string,
+        updatedAt: Date,
+      ): Promise<{ id: string; name: string; updatedAt: Date } | null>;
       findReconcileCandidates(now?: Date): Promise<Array<{ id: string; desiredState: string }>>;
     };
 
@@ -135,6 +141,19 @@ describe('BotInstanceRepository', () => {
       'user_1',
       'profile_1',
       new Date('2026-03-30T00:00:01.000Z'),
+    );
+    const renamedAt = new Date('2026-03-30T00:00:02.000Z');
+    const renamed = await scopedRepository.updateNameForOwner(
+      'bot_1',
+      'user_1',
+      'Renamed Bot',
+      renamedAt,
+    );
+    const blockedRename = await scopedRepository.updateNameForOwner(
+      'bot_1',
+      'user_2',
+      'Wrong Owner Rename',
+      renamedAt,
     );
     const runnable = await scopedRepository.findReconcileCandidates();
     const events = await botEvents.listByBotInstanceId('bot_1');
@@ -155,6 +174,12 @@ describe('BotInstanceRepository', () => {
       id: 'bot_1',
       llmConfigId: 'profile_1',
     });
+    expect(renamed).toMatchObject({
+      id: 'bot_1',
+      name: 'Renamed Bot',
+      updatedAt: renamedAt,
+    });
+    expect(blockedRename).toBeNull();
     expect(runnable).toHaveLength(2);
     expect(runnable.map((item) => item.id)).toEqual(['bot_1', 'bot_2']);
     expect(events).toHaveLength(1);

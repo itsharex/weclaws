@@ -11,6 +11,7 @@ const resolveInstancesRootMock = vi.fn();
 const rmMock = vi.fn();
 const setDesiredStateMock = vi.fn();
 const updateLlmConfigBindingMock = vi.fn();
+const updateNameForOwnerMock = vi.fn();
 
 vi.mock('node:fs/promises', () => ({
   mkdir: vi.fn(),
@@ -39,6 +40,7 @@ vi.mock('../repositories', () => ({
       requestRestart: requestRestartMock,
       setDesiredState: setDesiredStateMock,
       updateLlmConfigBinding: updateLlmConfigBindingMock,
+      updateNameForOwner: updateNameForOwnerMock,
     },
     userLlmProfiles: {
       findByIdForUser: findProfileByIdForUserMock,
@@ -357,6 +359,74 @@ describe('bot-service DTO mapping', () => {
       model: 'gpt-5.5',
       provider: 'openai',
       restartRequestedAt: '2026-03-30T00:00:10.000Z',
+    });
+  });
+
+  it('updates a bot name for the owner without requesting a restart', async () => {
+    updateNameForOwnerMock.mockResolvedValue({
+      createdAt: new Date('2026-03-30T00:00:00.000Z'),
+      desiredState: 'running',
+      heartbeatAt: new Date('2026-03-30T00:00:05.000Z'),
+      id: 'bot_1',
+      llmConfigId: 'profile_1',
+      lastErrorCode: null,
+      lastErrorMessage: null,
+      lastQrCodeId: null,
+      lastQrCodeUrl: null,
+      model: 'claude-opus-4-6',
+      name: 'Renamed Bot',
+      ownerUserId: 'user_1',
+      processPid: 123,
+      processStartedAt: new Date('2026-03-30T00:00:01.000Z'),
+      provider: 'anthropic',
+      restartRequestedAt: null,
+      status: 'running',
+      updatedAt: new Date('2026-03-30T00:01:00.000Z'),
+      weixinAccountId: 'wx_acc_1',
+      workspaceId: 'ws_1',
+    });
+    findProfileByIdForUserMock.mockResolvedValue({
+      id: 'profile_1',
+      name: 'Primary',
+      userId: 'user_1',
+    });
+
+    const { updateBotName } = await import('../bot-service');
+    const bot = await updateBotName({
+      botId: 'bot_1',
+      name: 'Renamed Bot',
+      ownerUserId: 'user_1',
+    });
+
+    expect(updateNameForOwnerMock).toHaveBeenCalledWith(
+      'bot_1',
+      'user_1',
+      'Renamed Bot',
+      expect.any(Date),
+    );
+    expect(requestRestartMock).not.toHaveBeenCalled();
+    expect(bot).toMatchObject({
+      id: 'bot_1',
+      llmProfileName: 'Primary',
+      name: 'Renamed Bot',
+      restartRequestedAt: null,
+      status: 'running',
+    });
+  });
+
+  it('returns not found when updating a bot name outside the owner scope', async () => {
+    updateNameForOwnerMock.mockResolvedValue(null);
+
+    const { updateBotName } = await import('../bot-service');
+
+    await expect(updateBotName({
+      botId: 'bot_1',
+      name: 'Renamed Bot',
+      ownerUserId: 'user_2',
+    })).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+      message: 'Bot not found.',
+      status: 404,
     });
   });
 

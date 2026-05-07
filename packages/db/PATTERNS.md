@@ -55,6 +55,7 @@
 - `BotInstanceRepository.countByOwnerUserId()` 只暴露 owner-scoped Bot 数量聚合，供 web 层做每用户创建额度判断；不要把更宽泛的任意条件计数接口下沉到 repository
 - `UserLlmProfileRepository` 同样保持窄接口：只允许 owner-scoped `create/list/find/update/delete`；不要在 DB 层引入“解析生效配置”或“批量换绑 bot”这类跨边界逻辑
 - `bot_instances.llm_config_id` 是 bot 当前绑定 profile 的唯一持久化真相；`listByOwnerUserIdAndLlmConfigId()` / `updateLlmConfigBinding()` 用于 profile 级 restart 和换绑收敛，不扩展成通用条件更新
+- `BotInstanceRepository.updateNameForOwner()` 是 Bot 展示名称的唯一修改入口；必须保持 owner-scoped 且只写 `name / updatedAt`，不要扩展成通用 bot patch 接口
 - restart/backoff/failed 的判定在 supervisor；repository 只负责把已经确定的状态原子写回 SQLite
 - `requestRestart()` 如果命中 `failed` bot，必须把它先转回可 reconcile 状态；“能否再次启动”仍由 supervisor 后续按当前配置和 runtime contract 判断
 - `recordRuntimeConfigSnapshot()` 只负责回写 bot 最近一次将应用的 `provider / model` 快照，不在 DB 层解析用户配置或 env fallback
