@@ -1,8 +1,8 @@
 <div align="center">
-  <h1>
-    <img src="logo.png" alt="WeClaws logo" width="30" align="middle" />
+  <img src="logo.png" alt="WeClaws logo" width="64" align="middle" />
+  <h2>
     WeClaws
-  </h1>
+  </h2>
   <p><strong>一键部署、多用户注册、统一托管微信智能体机器人</strong></p>
   <p>
     <a href="https://github.com/baseclaw/weclaws"><img alt="GitHub stars" src="https://img.shields.io/github/stars/baseclaw/weclaws?style=social" /></a>
@@ -12,13 +12,13 @@
   </p>
 </div>
 
-WeClaws 是一个可直接部署的微信智能体机器人管理面板。它把 FastAgent CLI 的微信接入、工具调用、技能、MCP、记忆、定时任务和沙盒执行能力，包装成一个面向多人使用的网页服务。
+WeClaws 是一个可一键部署的微信智能体机器人WEB管理面板。基于 FastAgent CLI 接入微信对话通道，支持工具调用、技能、MCP、记忆、做梦、定时任务和沙盒执行能力。
 
-管理员部署一次，用户就可以通过网页注册/登录、配置模型服务、创建自己的微信机器人、扫码登录微信，并让机器人长期在线运行。系统内置用户账号、邀请码注册、模型配置、状态实时刷新、机器人生命周期管理和按用户隔离的远程沙盒。
+通过在云端或者本地服务器部署，用户就可以通过网页注册/登录、配置模型服务、创建自己的微信机器人、扫码登录微信，并让机器人长期在线运行。系统内置用户账号、邀请码注册、模型配置、状态实时刷新、机器人生命周期管理和按用户隔离的远程沙盒。
 
 简单说：
 
-- Docker Compose 可以一次拉起网页、supervisor 和沙盒运行时。
+- Docker Compose 可以一次拉起网页、supervisor、沙盒运行时和 `browserless`。
 - WeClaws 提供多用户账号、注册邀请、模型配置、机器人管理和实时状态。
 - `@fastagent/cli` 负责真正的微信机器人对话和工具执行。
 - `@fastagent/sandbox-runtime` 提供按用户隔离的远程执行环境。
@@ -44,7 +44,7 @@ WeClaws 适合想把微信智能体从“手工跑一个命令”升级成“多
 - 用 SQLite 保存用户、机器人、模型配置、运行意图和状态，不把内存当作事实来源。
 - 按用户分配远程沙盒进程池，让机器人在隔离环境中使用工具。
 - 同步和管理 WeClaws 托管的技能包，同时保留用户自己的技能。
-- 通过 Docker Compose 快速部署网页、supervisor、沙盒运行时三个服务。
+- 通过 Docker Compose 快速部署网页、supervisor、沙盒运行时和 `browserless` 四个服务。
 
 ## 模型服务支持
 
@@ -63,7 +63,7 @@ FastAgent CLI 还对 OpenAI Chat Completions 兼容接口下的 Kimi K2（`kimi-
 
 WeClaws 当前集成：
 
-- `@fastagent/cli@0.6.42`
+- `@fastagent/cli@0.6.43`
 - `@fastagent/sandbox-runtime@0.5.0`
 
 [`@fastagent/cli`](https://www.npmjs.com/package/@fastagent/cli) 是用户真正使用的智能体运行时，更完整的命令、配置和能力说明可以查看它的 npm 页面。当前公开能力包括：
@@ -105,7 +105,7 @@ fastagent --channel weixin
 - 媒体处理：`ffmpeg`。
 - 文档和文本提取：`pdftotext`、`pdfinfo`、`pandoc`。
 - 沙盒基础：`bubblewrap` 和 `@fastagent/sandbox-runtime`。
-- 浏览器自动化支持建设中：镜像已预置 `agent-browser` 和 Chromium，但 WeClaws 还在补齐稳定接入和使用体验。
+- 浏览器自动化：镜像已预置 `agent-browser` 和 Chromium，默认 Compose 还会提供 `browserless` sidecar；受支持路径是由沙盒内 `agent-browser -p browserless` 连接远程浏览器后端。
 
 用户 API 密钥、OAuth token、微信登录态、设备配对态等个性化状态不会被打进镜像，仍然需要通过运行时配置或外部状态注入。
 
@@ -132,7 +132,7 @@ WeClaws 内置一组官方托管技能，来源位于 `resources/skills/managed`
 | `skill-creator` | 创建、编辑、校验和打包 FastAgent 技能 | `python3` |
 | `video-frames` | 用 ffmpeg 从视频中截帧或生成检查图 | `ffmpeg` |
 | `personal-planner` | 面向复杂任务的先规划、再执行工作流 | 无额外命令依赖 |
-| `agent-browser` | 浏览器自动化技能说明已收编，相关能力正在增加支持中 | `agent-browser`、Chromium |
+| `agent-browser` | 浏览器自动化技能说明已收编，默认走 Browserless sidecar | `agent-browser`、Chromium、Browserless sidecar |
 
 技能是否真正可用，还取决于运行环境里是否具备对应命令和授权。例如 GitHub 技能需要可用的 `gh` 认证上下文；用户级密钥和 OAuth 状态不会内置进镜像。
 
@@ -196,7 +196,7 @@ pnpm dev:supervisor
 
 ### Docker Compose 一键部署
 
-默认 Compose 栈包含网页、supervisor 和 sandbox-runtime 三个服务。复制环境文件后，一条命令即可拉起：
+默认 Compose 栈包含网页、supervisor、sandbox-runtime 和 `browserless` 四个服务。复制环境文件后，一条命令即可拉起：
 
 ```bash
 cp infra/compose/.env.example infra/compose/.env
