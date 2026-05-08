@@ -1,6 +1,6 @@
 {
   "name": "weclaws",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.4",
@@ -15,6 +15,8 @@
     "typecheck": "pnpm -r typecheck",
     "test:fastagent-contract": "pnpm exec vitest --run tests/integration/fastagent-cli-contract.test.ts",
     "lint": "pnpm run typecheck",
+    "version:check": "node ./scripts/product-version.mjs check",
+    "version:sync": "node ./scripts/product-version.mjs sync",
     "db:generate": "pnpm --filter @weclaws/db db:generate",
     "db:migrate": "pnpm --filter @weclaws/db db:migrate"
   },
