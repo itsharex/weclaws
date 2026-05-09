@@ -130,7 +130,7 @@ main:
       env:
         IMAGE_TAG: ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/sandbox-runtime:latest-linux-amd64
         TARGETARCH: amd64
-        AGENT_BROWSER_NPM_VERSION: "0.25.4"
+        AGENT_BROWSER_NPM_VERSION: "0.27.0"
       stages:
         - name: docker login
           script: docker login -u ${CNB_TOKEN_USER_NAME} -p "${CNB_TOKEN}" ${CNB_DOCKER_REGISTRY}
@@ -157,7 +157,7 @@ main:
       env:
         IMAGE_TAG: ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}/sandbox-runtime:latest-linux-arm64
         TARGETARCH: arm64
-        AGENT_BROWSER_NPM_VERSION: "0.25.4"
+        AGENT_BROWSER_NPM_VERSION: "0.27.0"
       stages:
         - name: docker login
           script: docker login -u ${CNB_TOKEN_USER_NAME} -p "${CNB_TOKEN}" ${CNB_DOCKER_REGISTRY}

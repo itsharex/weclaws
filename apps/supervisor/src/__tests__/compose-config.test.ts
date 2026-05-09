@@ -69,6 +69,30 @@ describe('docker compose supervisor env wiring', () => {
     expect(envExample).toContain('AGENT_BROWSER_NPM_VERSION=0.27.0');
   });
 
+  it('keeps remote sandbox-runtime image builds aligned with the Dockerfile agent-browser default', async () => {
+    const dockerfilePath = fileURLToPath(
+      new URL('../../../../infra/docker/sandbox-runtime.Dockerfile', import.meta.url),
+    );
+    const cnbConfigPath = fileURLToPath(
+      new URL('../../../../.cnb.yml', import.meta.url),
+    );
+
+    const [dockerfile, cnbConfig] = await Promise.all([
+      readFile(dockerfilePath, 'utf8'),
+      readFile(cnbConfigPath, 'utf8'),
+    ]);
+    const dockerfileVersion = dockerfile.match(/^ARG AGENT_BROWSER_NPM_VERSION=(?<version>\S+)$/m)
+      ?.groups?.version;
+    const cnbPinnedVersions = Array.from(
+      cnbConfig.matchAll(/AGENT_BROWSER_NPM_VERSION:\s*"(?<version>[^"]+)"/g),
+      (match) => match.groups?.version,
+    );
+
+    expect(dockerfileVersion).toBe('0.27.0');
+    expect(cnbPinnedVersions).toEqual([dockerfileVersion, dockerfileVersion]);
+    expect(cnbConfig).toContain('--build-arg AGENT_BROWSER_NPM_VERSION="${AGENT_BROWSER_NPM_VERSION}"');
+  });
+
   it('pins bun and uv versions through the sandbox compose build surface', async () => {
     const composePath = fileURLToPath(
       new URL('../../../../infra/compose/docker-compose.yml', import.meta.url),

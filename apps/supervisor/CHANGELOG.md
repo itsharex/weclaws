@@ -4,6 +4,7 @@
 
 ### Changed
 
+- CNB 远程 `sandbox-runtime` 镜像构建的 `AGENT_BROWSER_NPM_VERSION` 已同步到 `0.27.0`，并新增 Compose 配置回归测试锁住发布流水线与 Dockerfile 默认值一致，避免远程 latest 镜像继续被 build-arg 覆盖回旧版 `agent-browser`。
 - `sandbox-runtime` 镜像已移除本地 Chromium 与 `agent-browser install --with-deps` 构建路径；当前公开 Compose 基线只保留 `agent-browser -p browserless` 远程浏览器能力，不再支持在 nested sandbox 内本地 launch 浏览器。
 - `compose-config` 回归测试、部署手册、版本矩阵和托管技能说明已同步收口到 Browserless-only 契约，避免继续暗示 ARM64 或其他环境存在本地 Chromium fallback。
 - 默认 Compose 拓扑新增 `browserless` sidecar，作为 WeClaws 受支持的远程浏览器后端；`sandbox-runtime` 继续保留 `agent-browser` 客户端与文件输出边界，但真实浏览器进程现在优先交给 sidecar 承载。
