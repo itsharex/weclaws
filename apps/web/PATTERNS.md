@@ -164,6 +164,7 @@
 - sandbox-runtime 管理 API 在读写 `defaultDenyRead` 时必须净化 `/etc/mtab`；Linux remote sandbox 的 mount 信息降敏统一依赖标准化 `${WECLAWS_DATA_ROOT}` 和敏感 `/proc` 入口 deny，不能让管理台继续把这条历史坏配置写回数据库
 - status 文件路径统一通过 `resolveSrtPoolStatusFile()` 解析；缺失 `srt-pool-status.json` 是允许状态，页面/API 仍应展示数据库里的 pool 配置
 - 管理台列表在账号很多时必须优先展示紧凑摘要；列表级详细信息只保留并列展示的 `Port / CPU / 内存`，`重启 / 启停 / 保存配置` 与其他运行细节统一收进模态框，不要回到每个账号一整块展开编辑
+- sandbox-runtime 管理台里的时间字段必须复用 [`src/components/ui/localized-date-time.tsx`](./src/components/ui/localized-date-time.tsx)，不要在 `admin-sandbox-runtime-console.tsx` render 阶段自行 `new Date()` 格式化
 - `workspaceBasePath` 属于 runtime 派生路径，不允许在浏览器里编辑，也不允许通过 admin PATCH 更新
 - admin pool 表单至少要做本地正整数校验，以及 `minReadyProcesses <= poolSize`、`portRangeStart <= portRangeEnd` 这两条跨字段校验；无效输入不应发出 PATCH 请求
 - PATCH pool 只允许更新显式配置字段；任何未知字段、`workspaceBasePath` 或 API key material 都必须返回 `400 SRT_POOL_INVALID_CONFIG`

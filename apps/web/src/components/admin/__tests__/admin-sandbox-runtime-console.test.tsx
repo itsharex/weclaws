@@ -59,7 +59,10 @@ it('requests a pool restart and updates the visible restart timestamp', async ()
       method: 'POST',
     });
   });
-  expect(await screen.findByText('2026-05-02 03:00:00 UTC')).toBeInTheDocument();
+  const restartTime = await screen.findByText((_content, element) => (
+    element?.tagName === 'TIME' && element.getAttribute('dateTime') === '2026-05-02T03:00:00.000Z'
+  ));
+  expect(restartTime).toBeInTheDocument();
 });
 
 it('saves edited pool capacity through the admin PATCH API', async () => {

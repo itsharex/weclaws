@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { ErrorNotice } from '@/components/ui/error-notice';
 import { Input } from '@/components/ui/input';
+import { LocalizedDateTime } from '@/components/ui/localized-date-time';
 import type {
   AdminSandboxRuntimePoolItem,
   AdminSandboxRuntimePoolsPayload,
@@ -69,7 +70,7 @@ const EDITABLE_FIELD_NAMES: readonly FieldName[] = [
 ];
 
 export function AdminSandboxRuntimeConsole({ initialData }: AdminSandboxRuntimeConsoleProps) {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const [data, setData] = useState(initialData);
   const [editors, setEditors] = useState(() => createEditorStateByOwner(initialData.pools));
   const [fieldErrors, setFieldErrors] = useState<Record<string, FieldErrors>>({});
@@ -432,7 +433,13 @@ export function AdminSandboxRuntimeConsole({ initialData }: AdminSandboxRuntimeC
                 <PoolMetric label={t((messages) => messages.adminSandboxRuntime.memory)} value={formatBytes(selectedPool.runtime?.rssBytes ?? null, unavailableLabel)} />
                 <PoolMetric
                   label={t((messages) => messages.adminSandboxRuntime.lastRestart)}
-                  value={formatUtcDateTime(selectedPool.restartRequestedAt) ?? unavailableLabel}
+                  value={
+                    <LocalizedDateTime
+                      locale={locale}
+                      unavailableLabel={unavailableLabel}
+                      value={selectedPool.restartRequestedAt}
+                    />
+                  }
                 />
               </dl>
             </div>
@@ -559,7 +566,7 @@ function ResourceMetric({ icon, label, value }: ResourceMetricProps) {
 
 interface PoolMetricProps {
   label: string;
-  value: string;
+  value: ReactNode;
 }
 
 function PoolMetric({ label, value }: PoolMetricProps) {
@@ -730,25 +737,4 @@ function formatBytes(value: number | null, unavailableLabel: string) {
 
 function formatNullableNumber(value: number | null, unavailableLabel: string) {
   return value === null ? unavailableLabel : String(value);
-}
-
-function formatUtcDateTime(value: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  const yyyy = date.getUTCFullYear();
-  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(date.getUTCDate()).padStart(2, '0');
-  const hh = String(date.getUTCHours()).padStart(2, '0');
-  const min = String(date.getUTCMinutes()).padStart(2, '0');
-  const sec = String(date.getUTCSeconds()).padStart(2, '0');
-
-  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec} UTC`;
 }

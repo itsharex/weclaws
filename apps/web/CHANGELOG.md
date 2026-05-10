@@ -10,6 +10,7 @@
 - bot 详情页新增独立“二维码与分享”模块，集中承载二维码预览、`Reissue QR`、公开分享开关和复制链接；模块内二维码使用紧凑展示，减少重复小标题、来源说明和预览说明。
 - 二维码与分享模块取消内部两列并排布局，改为单列满宽流，避免左侧控制栏里二维码和分享控件拥挤错位。
 - 二维码预览下方的 `Open QR page` 和 `Reissue QR` 现在位于同一横行动作组，窄屏自动换行。
+- sandbox-runtime 管理台的 pool 重启时间改为复用 `LocalizedDateTime`，避免客户端组件在 render 阶段自行格式化时间造成 hydration mismatch。
 - bot 列表页现在支持直接点击名称做 inline rename；本地列表状态由 `BotsConsole` 持有，保存继续走 owner-scoped `PATCH /api/bots/[id]`，详情页不再保留独立名称编辑卡片。
 - inline rename 的客户端交互已收口到独立 `BotRenameControl`，避免列表渲染组件继续承载表单副作用。
 - 二维码与分享模块提供 `Reissue QR` 动作：web 只写 `POST /api/bots/[id]/reissue-qr` intent，不伪装成微信通道内的真实登出；runtime 后续由 supervisor 停实例、清登录态并重新出码。
