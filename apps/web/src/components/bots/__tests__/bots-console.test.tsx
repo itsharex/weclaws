@@ -117,6 +117,11 @@ it('renames a bot inline from the list without using the detail page editor', as
     { locale: 'en' }
   );
 
+  expect(screen.getByRole('button', { name: 'Alpha' })).toHaveAttribute(
+    'title',
+    'Click to rename bot',
+  );
+
   await userEvent.click(screen.getByText('Alpha'));
   await userEvent.clear(screen.getByRole('textbox', { name: 'Bot Name' }));
   await userEvent.type(screen.getByRole('textbox', { name: 'Bot Name' }), 'Renamed Alpha');

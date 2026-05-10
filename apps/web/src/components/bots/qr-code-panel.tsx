@@ -1,17 +1,26 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { normalizeTrustedQrCodeUrl } from '@weclaws/shared';
 import { useLocale } from '@/components/providers/locale-provider';
 import { SectionCard } from '@/components/layout/section-card';
 import { Button } from '@/components/ui/button';
 
 interface QrCodePanelProps {
+  actions?: ReactNode;
+  compact?: boolean;
   embedded?: boolean;
   qrCodeId: string | null;
   qrCodeUrl: string | null;
 }
 
-export function QrCodePanel({ embedded = false, qrCodeId, qrCodeUrl }: QrCodePanelProps) {
+export function QrCodePanel({
+  actions,
+  compact = false,
+  embedded = false,
+  qrCodeId,
+  qrCodeUrl,
+}: QrCodePanelProps) {
   const { t } = useLocale();
   const trustedQrCodeUrl = normalizeTrustedQrCodeUrl(qrCodeUrl);
   const qrPreviewUrl = trustedQrCodeUrl ? `/api/qrcode?value=${encodeURIComponent(trustedQrCodeUrl)}` : null;
@@ -27,32 +36,60 @@ export function QrCodePanel({ embedded = false, qrCodeId, qrCodeUrl }: QrCodePan
         </div>
       ) : null}
 
-      <div className="grid gap-2 text-sm leading-6 text-muted-foreground">
-        {qrCodeId ? (
-          <p className="m-0">
-            {t((messages) => messages.botDetail.qrId)}: <span className="font-mono text-foreground">{qrCodeId}</span>
-          </p>
-        ) : null}
-        <p className="m-0">
-          {qrCodeId
-            ? t((messages) => messages.botDetail.qrSourcePair)
-            : t((messages) => messages.botDetail.qrSourceUrlOnly)}
-        </p>
-        <p className="m-0">{t((messages) => messages.botDetail.qrPreviewDescription)}</p>
-      </div>
+      <div
+        className={
+          compact
+            ? 'flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground'
+            : 'grid gap-2 text-sm leading-6 text-muted-foreground'
+        }
+      >
+        <div className="min-w-0">
+          {qrCodeId ? (
+            <p className="m-0">
+              {t((messages) => messages.botDetail.qrId)}: <span className="font-mono text-foreground">{qrCodeId}</span>
+            </p>
+          ) : null}
+          {compact ? null : (
+            <>
+              <p className="m-0">
+                {qrCodeId
+                  ? t((messages) => messages.botDetail.qrSourcePair)
+                  : t((messages) => messages.botDetail.qrSourceUrlOnly)}
+              </p>
+              <p className="m-0">{t((messages) => messages.botDetail.qrPreviewDescription)}</p>
+            </>
+          )}
+        </div>
 
-      <div>
-        <Button asChild type="button" variant="outline">
-          <a href={trustedQrCodeUrl} rel="noreferrer" target="_blank">
-            {t((messages) => messages.botDetail.openQrPage)}
-          </a>
-        </Button>
+        <div
+          aria-label={t((messages) => messages.botDetail.qrActionsRegion)}
+          className="flex flex-wrap items-center gap-2"
+          role="group"
+        >
+          <Button asChild size={compact ? 'sm' : 'default'} type="button" variant="outline">
+            <a href={trustedQrCodeUrl} rel="noreferrer" target="_blank">
+              {t((messages) => messages.botDetail.openQrPage)}
+            </a>
+          </Button>
+          {actions}
+        </div>
       </div>
     </div>
   ) : (
-    <div className="grid gap-2 rounded-[1.25rem] border border-dashed border-[color:var(--border-strong)]/75 bg-[color:var(--surface-muted)]/72 px-5 py-6">
-      <strong className="text-base font-semibold text-foreground">{t((messages) => messages.botDetail.noQrTitle)}</strong>
-      <p className="m-0 text-sm leading-6 text-muted-foreground">{t((messages) => messages.botDetail.noQrDescription)}</p>
+    <div className="grid gap-3 rounded-[1.25rem] border border-dashed border-[color:var(--border-strong)]/75 bg-[color:var(--surface-muted)]/72 px-5 py-6">
+      <div className="grid gap-2">
+        <strong className="text-base font-semibold text-foreground">{t((messages) => messages.botDetail.noQrTitle)}</strong>
+        <p className="m-0 text-sm leading-6 text-muted-foreground">{t((messages) => messages.botDetail.noQrDescription)}</p>
+      </div>
+      {actions ? (
+        <div
+          aria-label={t((messages) => messages.botDetail.qrActionsRegion)}
+          className="flex flex-wrap items-center gap-2"
+          role="group"
+        >
+          {actions}
+        </div>
+      ) : null}
     </div>
   );
 

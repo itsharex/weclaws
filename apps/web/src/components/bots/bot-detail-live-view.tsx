@@ -7,8 +7,7 @@ import type { BotDetailItem, BotEventItem } from '@/lib/bot-service';
 import type { LlmProfileItem } from '@/lib/llm-profiles';
 import { BotDetailHeader } from './bot-detail-header';
 import { BotEventsList } from './bot-events-list';
-import { BotLlmProfileCard } from './bot-llm-profile-card';
-import { BotStatusCard } from './bot-status-card';
+import { BotQrSharePanel } from './bot-qr-share-panel';
 
 interface BotDetailLiveViewProps {
   initialBot: BotDetailItem;
@@ -62,22 +61,21 @@ export function BotDetailLiveView({ initialBot, initialEvents, profiles }: BotDe
 
   return (
     <div className="grid gap-6">
-      <BotDetailHeader bot={bot} />
+      <BotDetailHeader
+        bot={bot}
+        onBotUpdated={(nextBot) => {
+          setBot(nextBot);
+        }}
+        profiles={profiles}
+      />
       {streamErrorMessage ? <ErrorNotice>{streamErrorMessage}</ErrorNotice> : null}
       <div className="grid gap-6 xl:grid-cols-[minmax(20rem,0.95fr)_minmax(0,1.05fr)]">
         <aside aria-label={t((messages) => messages.botDetail.controlsRegion)} className="grid content-start gap-6">
-          <BotStatusCard
+          <BotQrSharePanel
             bot={bot}
             onBotUpdated={(nextBot) => {
               setBot(nextBot);
             }}
-          />
-          <BotLlmProfileCard
-            bot={bot}
-            onBotUpdated={(nextBot) => {
-              setBot(nextBot);
-            }}
-            profiles={profiles}
           />
         </aside>
 

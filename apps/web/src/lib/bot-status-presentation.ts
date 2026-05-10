@@ -10,10 +10,15 @@ interface Presentation {
   tone: PresentationTone;
 }
 
+type BotDetailMessages = ReturnType<typeof getMessages>['botDetail'];
+type BotDetailStringKey = {
+  [Key in keyof BotDetailMessages]: BotDetailMessages[Key] extends string ? Key : never;
+}[keyof BotDetailMessages];
+
 const RUNTIME_STATUS_CONFIG: Record<
   string,
   {
-    messageKey: keyof ReturnType<typeof getMessages>['botDetail'];
+    messageKey: BotDetailStringKey;
     tone: PresentationTone;
   }
 > = {

@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 
 import * as React from 'react';
-import { act, screen, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithLocale } from '@/test/render';
 import { afterEach, expect, it, vi } from 'vitest';
 import { BotDetailLiveView } from '../bot-detail-live-view';
@@ -17,13 +18,97 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-it('renders runtime controls on the left and recent events on the right', () => {
+it('renders primary actions in the header and separates qr sharing from runtime summary', async () => {
   const eventSourceMock = {
     addEventListener: vi.fn(),
     close: vi.fn(),
   };
+  const updatedBot = {
+    createdAt: '',
+    desiredState: 'running',
+    heartbeatAt: null,
+    id: 'bot_1',
+    lastErrorCode: null,
+    lastErrorMessage: null,
+    lastQrCodeId: 'qr_1',
+    lastQrCodeUrl: 'https://liteapp.weixin.qq.com/q/7GiQu1?qrcode=abc&bot_type=3',
+    llmConfigId: 'profile_1',
+    llmProfileName: 'Primary',
+    model: 'claude-opus-4-6',
+    name: 'Alpha',
+    processPid: 123,
+    processStartedAt: null,
+    provider: 'anthropic',
+    qrReissueRequestedAt: null,
+    restartRequestedAt: null,
+    status: 'waiting_for_qr',
+    updatedAt: '',
+    weixinAccountId: null,
+    workspaceId: 'w1',
+  };
+  const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+
+    if (url.endsWith('/qr-share') && init?.method !== 'POST') {
+      return Promise.resolve(new Response(JSON.stringify({
+        data: null,
+        error: null,
+      }), { status: 200 }));
+    }
+
+    if (url.endsWith('/reissue-qr')) {
+      return Promise.resolve(new Response(JSON.stringify({
+        data: {
+          ...updatedBot,
+          qrReissueRequestedAt: '2026-05-10T10:00:00.000Z',
+        },
+        error: null,
+      }), { status: 200 }));
+    }
+
+    if (url.endsWith('/skills/sync')) {
+      return Promise.resolve(new Response(JSON.stringify({
+        data: {
+          result: {
+            error: null,
+            skippedConflicts: [],
+            status: 'success',
+          },
+        },
+        error: null,
+      }), { status: 200 }));
+    }
+
+    if (url.endsWith('/stop')) {
+      return Promise.resolve(new Response(JSON.stringify({
+        data: {
+          ...updatedBot,
+          desiredState: 'stopped',
+          status: 'stopping',
+        },
+        error: null,
+      }), { status: 200 }));
+    }
+
+    if (url.endsWith('/restart')) {
+      return Promise.resolve(new Response(JSON.stringify({
+        data: {
+          ...updatedBot,
+          restartRequestedAt: '2026-05-10T10:01:00.000Z',
+          status: 'starting',
+        },
+        error: null,
+      }), { status: 200 }));
+    }
+
+    return Promise.resolve(new Response(JSON.stringify({
+      data: null,
+      error: null,
+    }), { status: 200 }));
+  });
 
   vi.stubGlobal('EventSource', vi.fn(() => eventSourceMock));
+  vi.stubGlobal('fetch', fetchMock);
 
   renderWithLocale(
     <BotDetailLiveView
@@ -34,14 +119,14 @@ it('renders runtime controls on the left and recent events on the right', () => 
         model: 'claude-opus-4-6',
         workspaceId: 'w1',
         desiredState: 'running',
-        status: 'running',
+        status: 'waiting_for_qr',
         processPid: 123,
         processStartedAt: null,
         heartbeatAt: null,
         restartRequestedAt: null,
         qrReissueRequestedAt: null,
-        lastQrCodeId: null,
-        lastQrCodeUrl: null,
+        lastQrCodeId: 'qr_1',
+        lastQrCodeUrl: 'https://liteapp.weixin.qq.com/q/7GiQu1?qrcode=abc&bot_type=3',
         llmConfigId: 'profile_1',
         llmProfileName: 'Primary',
         weixinAccountId: null,
@@ -80,13 +165,78 @@ it('renders runtime controls on the left and recent events on the right', () => 
 
   const activityRegion = screen.getByRole('region', { name: 'Live Activity' });
   const controlsRegion = screen.getByRole('complementary', { name: 'Bot Controls' });
+  const headerActions = screen.getByRole('region', { name: 'Bot Header Actions' });
+  const qrShareRegion = screen.getByRole('region', { name: 'QR Code and Share' });
 
-  expect(within(controlsRegion).getByText('Runtime Summary')).toBeInTheDocument();
-  expect(within(controlsRegion).getByRole('combobox', { name: 'LLM Profile' })).toBeInTheDocument();
-  expect(within(controlsRegion).queryByText('QR Code')).not.toBeInTheDocument();
+  expect(within(controlsRegion).queryByText('Runtime Summary')).not.toBeInTheDocument();
+  expect(within(headerActions).getByRole('button', { name: 'Start' })).toBeInTheDocument();
+  expect(within(headerActions).getByRole('button', { name: 'Stop' })).toBeInTheDocument();
+  expect(within(headerActions).getByRole('button', { name: 'Restart' })).toBeInTheDocument();
+  expect(within(headerActions).getByRole('button', { name: 'Profile' })).toBeInTheDocument();
+  expect(within(headerActions).getByRole('button', { name: 'Sync Skills' })).toBeInTheDocument();
+  expect(within(headerActions).getByRole('button', { name: 'Delete Bot' })).toBeDisabled();
+  expect(within(qrShareRegion).queryByText('QR Code')).not.toBeInTheDocument();
+  expect(within(qrShareRegion).getByRole('img', { name: 'qr_1' })).toBeInTheDocument();
+  expect(within(qrShareRegion).getByText(/Create a public page link/)).toBeInTheDocument();
+  expect(within(qrShareRegion).queryByText(/Runtime field:/)).not.toBeInTheDocument();
+  expect(within(qrShareRegion).queryByText(/Preview rendered/)).not.toBeInTheDocument();
+  const qrActions = within(qrShareRegion).getByRole('group', { name: 'QR Code Actions' });
+  expect(within(qrActions).getByRole('link', { name: 'Open QR page' })).toBeInTheDocument();
+  expect(within(qrActions).getByRole('button', { name: 'Reissue QR' })).toBeInTheDocument();
   expect(within(activityRegion).getByText('Recent Events')).toBeInTheDocument();
   expect(within(activityRegion).queryByText('Technical Metadata')).not.toBeInTheDocument();
   expect(within(controlsRegion).queryByText('Technical Metadata')).not.toBeInTheDocument();
+  expect(screen.queryByRole('combobox', { name: 'LLM Profile' })).not.toBeInTheDocument();
+
+  await userEvent.click(within(qrShareRegion).getByRole('button', { name: 'Reissue QR' }));
+  expect(fetchMock).not.toHaveBeenCalledWith('/api/bots/bot_1/reissue-qr', {
+    method: 'POST',
+  });
+  await userEvent.click(screen.getByRole('button', { name: 'Confirm Reissue QR' }));
+  await waitFor(() => {
+    expect(fetchMock).toHaveBeenCalledWith('/api/bots/bot_1/reissue-qr', {
+      method: 'POST',
+    });
+  });
+
+  await userEvent.click(within(headerActions).getByRole('button', { name: 'Restart' }));
+  expect(fetchMock).not.toHaveBeenCalledWith('/api/bots/bot_1/restart', {
+    method: 'POST',
+  });
+  await userEvent.click(screen.getByRole('button', { name: 'Confirm Restart' }));
+  await waitFor(() => {
+    expect(fetchMock).toHaveBeenCalledWith('/api/bots/bot_1/restart', {
+      method: 'POST',
+    });
+  });
+
+  await userEvent.click(within(headerActions).getByRole('button', { name: 'Stop' }));
+  expect(fetchMock).not.toHaveBeenCalledWith('/api/bots/bot_1/stop', {
+    method: 'POST',
+  });
+  await userEvent.click(screen.getByRole('button', { name: 'Confirm Stop' }));
+  await waitFor(() => {
+    expect(fetchMock).toHaveBeenCalledWith('/api/bots/bot_1/stop', {
+      method: 'POST',
+    });
+  });
+
+  await userEvent.click(within(headerActions).getByRole('button', { name: 'Sync Skills' }));
+  expect(fetchMock).not.toHaveBeenCalledWith('/api/bots/bot_1/skills/sync', {
+    method: 'POST',
+  });
+  await userEvent.click(screen.getByRole('button', { name: 'Confirm Sync Skills' }));
+  await waitFor(() => {
+    expect(fetchMock).toHaveBeenCalledWith('/api/bots/bot_1/skills/sync', {
+      method: 'POST',
+    });
+  });
+  expect(await screen.findByText('Managed skills synced.')).toBeInTheDocument();
+
+  await userEvent.click(within(headerActions).getByRole('button', { name: 'Profile' }));
+
+  const profileDialog = screen.getByRole('dialog', { name: 'LLM Profile' });
+  expect(within(profileDialog).getByRole('combobox', { name: 'LLM Profile' })).toBeInTheDocument();
 });
 
 it('renders sanitized stream errors separately from bot runtime payload updates', async () => {

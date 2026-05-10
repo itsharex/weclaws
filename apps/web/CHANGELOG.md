@@ -4,14 +4,20 @@
 
 ### Changed
 
+- bot 列表页的 inline rename 名称按钮现在在 hover/focus 时提示“点击名称重命名 Bot”，保留点击名称进入编辑的轻量交互。
+- bot 详情页把 `Start` / `Stop` / `Restart`、`Profile`、`Sync Skills` 和 `Delete Bot` 入口提升到头部右侧；`Profile` 改为模态框编辑，不再常驻左侧控制栏。
+- bot 详情页移除独立 `运行概览` 卡片，启动时间并入头部 summary，`Stop` / `Restart` / `Sync Skills` / `Delete Bot` 等谨慎操作统一先弹确认再执行。
+- bot 详情页新增独立“二维码与分享”模块，集中承载二维码预览、`Reissue QR`、公开分享开关和复制链接；模块内二维码使用紧凑展示，减少重复小标题、来源说明和预览说明。
+- 二维码与分享模块取消内部两列并排布局，改为单列满宽流，避免左侧控制栏里二维码和分享控件拥挤错位。
+- 二维码预览下方的 `Open QR page` 和 `Reissue QR` 现在位于同一横行动作组，窄屏自动换行。
 - bot 列表页现在支持直接点击名称做 inline rename；本地列表状态由 `BotsConsole` 持有，保存继续走 owner-scoped `PATCH /api/bots/[id]`，详情页不再保留独立名称编辑卡片。
 - inline rename 的客户端交互已收口到独立 `BotRenameControl`，避免列表渲染组件继续承载表单副作用。
-- bot 状态卡片新增 `Reissue QR` 动作：web 只写 `POST /api/bots/[id]/reissue-qr` intent，不伪装成微信通道内的真实登出；runtime 后续由 supervisor 停实例、清登录态并重新出码。
+- 二维码与分享模块提供 `Reissue QR` 动作：web 只写 `POST /api/bots/[id]/reissue-qr` intent，不伪装成微信通道内的真实登出；runtime 后续由 supervisor 停实例、清登录态并重新出码。
 - 新增二维码公开分享闭环：
   - owner-scoped `GET/POST/DELETE /api/bots/[id]/qr-share`
   - 公共 `GET /api/share/qr/[token]`
   - 未登录也可访问的 `/share/qr/[token]` 公开页面
-- owner 侧二维码分享控件已拆成独立 `BotQrShareControls`，状态卡片只保留 runtime 命令、skills 同步和删除动作。
+- owner 侧二维码分享控件已拆成独立 `BotQrShareControls`，详情页维护动作统一由头部操作区承载。
 - 公开二维码页当前按 2 秒轮询最新 bot 状态；同一分享链接会在 bot 重出码后继续返回最新二维码，不需要重新复制新页面地址。
 - 公共 `GET /api/share/qr/[token]` 显式返回 `cache-control: no-store`，避免 QR 状态轮询和 revoke 结果被缓存。
 - `toApiError()` 继续只透传显式 `ApiError`；普通 error-like 对象统一折叠为通用 500，避免泄露底层错误细节。

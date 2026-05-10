@@ -18,6 +18,7 @@ import type { LlmProfileItem } from '@/lib/llm-profiles';
 
 interface BotLlmProfileCardProps {
   bot: BotDetailItem;
+  embedded?: boolean;
   onBotUpdated(bot: BotDetailItem): void;
   profiles: LlmProfileItem[];
 }
@@ -30,7 +31,12 @@ interface UpdateBotLlmProfileResponse {
   } | null;
 }
 
-export function BotLlmProfileCard({ bot, onBotUpdated, profiles }: BotLlmProfileCardProps) {
+export function BotLlmProfileCard({
+  bot,
+  embedded = false,
+  onBotUpdated,
+  profiles,
+}: BotLlmProfileCardProps) {
   const { t } = useLocale();
   const [selectedProfileId, setSelectedProfileId] = useState(bot.llmConfigId ?? profiles[0]?.id ?? '');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -42,53 +48,61 @@ export function BotLlmProfileCard({ bot, onBotUpdated, profiles }: BotLlmProfile
     setSelectedProfileId(bot.llmConfigId ?? profiles[0]?.id ?? '');
   }, [bot.llmConfigId, profiles]);
 
+  const content = (
+    <div className="grid gap-3">
+      <div className="grid gap-1 rounded-[1.2rem] border border-[color:var(--border-soft)]/80 bg-[color:var(--surface-muted)]/72 px-4 py-3">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-soft)]">
+          {t((messages) => messages.botDetail.currentProfile)}
+        </span>
+        <strong className="text-sm text-foreground">{bot.llmProfileName ?? t((messages) => messages.common.unavailable)}</strong>
+        <span className="text-sm text-muted-foreground">
+          {bot.provider} / {bot.model}
+        </span>
+      </div>
+
+      <Label className="grid gap-2.5 text-sm font-medium text-foreground">
+        {t((messages) => messages.botDetail.llmProfileLabel)}
+        <Select onValueChange={setSelectedProfileId} value={selectedProfileId}>
+          <SelectTrigger aria-label={t((messages) => messages.botDetail.llmProfileLabel)}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {profiles.map((profile) => (
+              <SelectItem key={profile.id} value={profile.id}>
+                {profile.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Label>
+
+      {selectedProfile ? (
+        <p className="m-0 text-sm text-muted-foreground">
+          {selectedProfile.provider} / {selectedProfile.model}
+        </p>
+      ) : null}
+
+      <Button disabled={isPending || !canApply} onClick={applyProfile} type="button">
+        {isPending
+          ? t((messages) => messages.botDetail.applyProfilePending)
+          : t((messages) => messages.botDetail.applyProfile)}
+      </Button>
+
+      {errorMessage ? <ErrorNotice>{errorMessage}</ErrorNotice> : null}
+    </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
   return (
     <SectionCard
       contentClassName="grid gap-4"
       description={t((messages) => messages.botDetail.llmProfileDescription)}
       title={t((messages) => messages.botDetail.llmProfileTitle)}
     >
-      <div className="grid gap-3">
-        <div className="grid gap-1 rounded-[1.2rem] border border-[color:var(--border-soft)]/80 bg-[color:var(--surface-muted)]/72 px-4 py-3">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-soft)]">
-            {t((messages) => messages.botDetail.currentProfile)}
-          </span>
-          <strong className="text-sm text-foreground">{bot.llmProfileName ?? t((messages) => messages.common.unavailable)}</strong>
-          <span className="text-sm text-muted-foreground">
-            {bot.provider} / {bot.model}
-          </span>
-        </div>
-
-        <Label className="grid gap-2.5 text-sm font-medium text-foreground">
-          {t((messages) => messages.botDetail.llmProfileLabel)}
-          <Select onValueChange={setSelectedProfileId} value={selectedProfileId}>
-            <SelectTrigger aria-label={t((messages) => messages.botDetail.llmProfileLabel)}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {profiles.map((profile) => (
-                <SelectItem key={profile.id} value={profile.id}>
-                  {profile.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Label>
-
-        {selectedProfile ? (
-          <p className="m-0 text-sm text-muted-foreground">
-            {selectedProfile.provider} / {selectedProfile.model}
-          </p>
-        ) : null}
-
-        <Button disabled={isPending || !canApply} onClick={applyProfile} type="button">
-          {isPending
-            ? t((messages) => messages.botDetail.applyProfilePending)
-            : t((messages) => messages.botDetail.applyProfile)}
-        </Button>
-
-        {errorMessage ? <ErrorNotice>{errorMessage}</ErrorNotice> : null}
-      </div>
+      {content}
     </SectionCard>
   );
 

@@ -31,6 +31,7 @@ export function BotRenameControl({ bot, onBotUpdated }: BotRenameControlProps) {
   const trimmedDraftName = draftName.trim();
   const canSubmit = Boolean(trimmedDraftName) && trimmedDraftName !== bot.name.trim() && !isPending;
   const nameLabel = t((messages) => messages.botDetail.botNameLabel);
+  const renameHint = t((messages) => messages.botsList.renameHint);
 
   useEffect(() => {
     setDraftName(bot.name);
@@ -38,17 +39,23 @@ export function BotRenameControl({ bot, onBotUpdated }: BotRenameControlProps) {
 
   if (!isEditing) {
     return (
-      <button
-        className="text-left text-xl font-semibold tracking-[-0.02em] text-foreground transition-colors hover:text-primary"
-        onClick={() => {
-          setDraftName(bot.name);
-          setErrorMessage(null);
-          setIsEditing(true);
-        }}
-        type="button"
-      >
-        {bot.name}
-      </button>
+      <span className="group relative inline-flex min-w-0">
+        <button
+          className="cursor-pointer text-left text-xl font-semibold tracking-[-0.02em] text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70"
+          onClick={() => {
+            setDraftName(bot.name);
+            setErrorMessage(null);
+            setIsEditing(true);
+          }}
+          title={renameHint}
+          type="button"
+        >
+          {bot.name}
+        </button>
+        <span className="pointer-events-none absolute left-0 top-[calc(100%+0.45rem)] z-20 whitespace-nowrap rounded-[0.7rem] border border-[color:var(--border-soft)] bg-[color:var(--surface-elevated)] px-2.5 py-1.5 text-xs font-medium text-foreground opacity-0 shadow-[var(--shadow-raise)] transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
+          {renameHint}
+        </span>
+      </span>
     );
   }
 

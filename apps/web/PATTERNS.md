@@ -101,7 +101,7 @@
   - `bot.stream.error`
 - 持续轮询必须走 DB cursor 增量读取；只允许在初始对齐阶段读取一次全量事件来建立最新 cursor
 - bot 事件 cursor 必须使用 DB 返回的稳定 `rowId`，不能依赖 `(createdAt, id)` 这种可能在同毫秒插入时乱序的组合键
-- 详情页只建立一条 EventSource 连接，由 `bot-detail-live-view.tsx` 统一分发到状态卡片、二维码面板和事件列表
+- 详情页只建立一条 EventSource 连接，由 `bot-detail-live-view.tsx` 统一分发到头部、二维码与分享面板和事件列表
 - SSE 只消费数据库已经收敛后的 runtime 详情，不直接订阅 supervisor 内存状态
 - `bot.error.updated` 只承载 `lastErrorCode / lastErrorMessage` 这类 bot runtime 字段；流本身的脱敏失败提示必须走单独的 `bot.stream.error`，不能再把 transport-level 异常伪装成 `BotDetailItem` patch
 
@@ -111,7 +111,7 @@
   - route page 只负责 session + `listBots()` + 顶部 header
   - [`src/components/bots/bots-console.tsx`](./src/components/bots/bots-console.tsx) 持有搜索词、runtime status filter 和空状态分支
   - [`src/components/bots/bot-list.tsx`](./src/components/bots/bot-list.tsx) 只负责结果渲染和 inline rename 交互，不再持有数据获取和筛选逻辑
-- 列表页重命名是当前唯一的 Bot 名称编辑入口：点击名称进入 input，`Enter` 保存、`Escape` 取消；保存成功后由 `BotsConsole` 只更新本地目标 bot，不刷新整个列表；具体表单副作用收敛在 [`src/components/bots/bot-rename-control.tsx`](./src/components/bots/bot-rename-control.tsx)
+- 列表页重命名是当前唯一的 Bot 名称编辑入口：点击名称进入 input，名称按钮必须在 hover/focus 时提示可重命名，`Enter` 保存、`Escape` 取消；保存成功后由 `BotsConsole` 只更新本地目标 bot，不刷新整个列表；具体表单副作用收敛在 [`src/components/bots/bot-rename-control.tsx`](./src/components/bots/bot-rename-control.tsx)
 - 登录后全局工具区统一收敛到 [`src/components/layout/console-toolbar.tsx`](./src/components/layout/console-toolbar.tsx)，只承载移动端菜单入口、主题切换和语言切换；桌面品牌展示收口到左 rail，不再在顶部重复放 logo
 - 浏览器元数据、左 rail 与认证页都应显示 `WeClaws` 品牌；对内 package/import 名称统一使用 `weclaws` / `@weclaws/*`
 - 顶部工具条只承载全局工具和管理员入口，不再渲染账号邮箱；账号身份与会话动作统一放在 [`src/components/layout/account-menu.tsx`](./src/components/layout/account-menu.tsx)
@@ -173,17 +173,17 @@
 ## Detail Presentation
 
 - [`src/components/bots/bot-detail-live-view.tsx`](./src/components/bots/bot-detail-live-view.tsx) 继续作为详情页唯一的 EventSource owner，子组件只消费 props，不自行开流
-- 详情页头部现在先渲染 bot 身份摘要，再在同一张横向 summary surface 内并排呈现 `当前运行状态` 和 `技术元数据`；不要再把 metadata 作为独立正文卡片放回主工作区
+- 详情页头部现在先渲染 bot 身份摘要，再在同一张横向 summary surface 内并排呈现 `当前运行状态` 和 `技术元数据`；`启动时间` 属于头部 runtime 字段，不再放回独立运行概览卡片
+- 详情页头部右侧承载操作区：`Start` 直接写 runtime intent，`Stop` / `Restart` / `Sync Skills` / `Delete Bot` 必须先弹确认再执行，`Profile` 作为按钮打开模态框并复用 LLM profile 绑定表单；profile 选择器不再常驻左侧控制栏
+- `Delete Bot` 只允许在 `desiredState=stopped`、`status=stopped`、`processPid=null` 时启用，成功后返回 `/bots`
 - 详情页工作区现在固定为“双栏主次结构”：
-  - 左栏是 `Bot Controls` complementary region，用于合并后的 `运行概览`、命令按钮和删除入口
+  - 左栏是 `Bot Controls` complementary region，用于二维码与分享模块
   - 右栏是 `Live Activity` region，用于最近事件
-- [`src/components/bots/bot-status-card.tsx`](./src/components/bots/bot-status-card.tsx) 保留 `Start` / `Stop` / `Restart` 三个按钮始终可见；只在请求进行中统一禁用，不做 runtime 乐观更新
-- [`src/components/bots/bot-status-card.tsx`](./src/components/bots/bot-status-card.tsx) 现在承担 `Reissue QR` 入口：`Reissue QR` 只写 runtime intent；二维码分享开关和复制链接收敛到 [`src/components/bots/bot-qr-share-controls.tsx`](./src/components/bots/bot-qr-share-controls.tsx)，统一走 owner-scoped `/api/bots/[id]/qr-share`
-- [`src/components/bots/bot-status-card.tsx`](./src/components/bots/bot-status-card.tsx) 现在额外提供 `Sync Skills` 按钮，只同步托管 `data/skills`，并以内联反馈展示成功 / busy / 非阻断错误
-- [`src/components/bots/bot-status-card.tsx`](./src/components/bots/bot-status-card.tsx) 现在还承担 bot 删除入口；删除只允许在 `desiredState=stopped`、`status=stopped`、`processPid=null` 时启用，并且必须经过 inline `Delete Bot -> Confirm Delete` 两步确认，成功后返回 `/bots`
+- [`src/components/bots/bot-qr-share-panel.tsx`](./src/components/bots/bot-qr-share-panel.tsx) 是详情页二维码与分享的唯一 owner 侧模块：只在 `waiting_for_qr` 展示当前二维码，提供确认后的 `Reissue QR` intent，并组合 [`src/components/bots/bot-qr-share-controls.tsx`](./src/components/bots/bot-qr-share-controls.tsx) 的公开分享开关和复制链接；该模块在左侧控制栏内必须保持单列满宽流，不要在模块内部再拆二维码/分享两列并排
+- [`src/components/bots/qr-code-panel.tsx`](./src/components/bots/qr-code-panel.tsx) 在详情页内使用 compact 模式，二维码区域只保留当前二维码、二维码 ID 和同一行动作组，不重复渲染模块标题、来源说明或预览说明；`Open QR page` 与 `Reissue QR` 必须放在同一个 actions group 中，窄屏允许自动换行
 - 详情页二维码只在 `status=waiting_for_qr` 时展示；即使数据库里仍保留最近一次 `lastQrCode*`，bot 进入 `running` / `degraded` / `stopped` 后也不能继续把旧二维码展示给用户
 - 公开二维码页统一走 [`src/components/bots/public-qr-share-view.tsx`](./src/components/bots/public-qr-share-view.tsx)；该页面不要求 WeClaws 登录态，只轮询公开 `GET /api/share/qr/[token]` 并渲染当前最新二维码
-- `运行概览` 卡片不再重复渲染头部已经展示过的 `status / desiredState / heartbeat / process state / latest error` 等字段；二维码内容直接内嵌到卡片顶部，独立二维码卡片与额外小标题块都移除
+- 详情页不再保留独立 `运行概览` / `BotStatusCard` 卡片；二维码预览、重出码和分享必须留在独立“二维码与分享”模块，skills 同步和删除必须留在头部操作区
 - bot 详情页里的 `返回 Bots` 按钮保持右对齐
 - 删除 bot 时，实例目录清理是 best-effort；如果 DB 级删除已经成功，目录清理失败只能记日志，不能把接口整体打成 `500`
 - [`src/components/bots/qr-code-panel.tsx`](./src/components/bots/qr-code-panel.tsx) 仍然只接受 shared validator 信任过的二维码 URL，并继续走同源 `/api/qrcode?value=...` 预览
@@ -202,11 +202,11 @@
 
 - 当前 UI 只覆盖最小可用闭环，不引入全局状态管理或 middleware 鉴权
 - 登录/注册只保留邮箱 + 密码；显示名由邮箱前缀派生
-- 详情页状态卡片展示 runtime 详情字段，但按钮依旧只发命令，不做进程级乐观更新
+- 详情页维护动作集中在头部操作区；头部/二维码模块里的命令按钮只发 intent，不做进程级乐观更新
 - `QrCodePanel` 不能假设 `lastQrCodeId` 一定存在；真实 runtime 允许只提供 `lastQrCodeUrl`
 - `QrCodePanel` 只信任 shared validator 通过的 `liteapp.weixin.qq.com/q/...` URL；其他 scheme/host/path 一律按“无可用二维码”处理
 - 可信扫码页 URL 统一走同源 `/api/qrcode?value=...` 重新编码成 SVG 预览，同时保留原始扫码页链接
-- 状态卡片里的时间与错误字段直接消费 DB 已收敛后的 runtime 值，不再额外推断 mock 专用语义
+- 头部里的时间与错误字段直接消费 DB 已收敛后的 runtime 值，不再额外推断 mock 专用语义
 
 ## Deployment Packaging
 
