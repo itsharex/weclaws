@@ -70,8 +70,8 @@ FastAgent CLI 还对 OpenAI Chat Completions 兼容接口下的 Kimi K2（`kimi-
 
 WeClaws 当前集成：
 
-- `@fastagent/cli@0.6.43`
-- `@fastagent/sandbox-runtime@0.5.0`
+- `@fastagent/cli@0.6.50`
+- `@fastagent/sandbox-runtime@0.5.2`
 
 [`@fastagent/cli`](https://www.npmjs.com/package/@fastagent/cli) 是用户真正使用的智能体运行时，更完整的命令、配置和能力说明可以查看它的 npm 页面。当前公开能力包括：
 

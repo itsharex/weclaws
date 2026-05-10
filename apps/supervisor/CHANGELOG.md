@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2026-05-11
+
+### Changed
+
+- 发布基线已同步到 WeClaws `0.2.0`，并把 repo-local FastAgent CLI 固定到 `@fastagent/cli@0.6.50`。
+- Compose 默认 `sandbox-runtime` npm 基线已升级到 `@fastagent/sandbox-runtime@0.5.2`，同步更新 README、版本矩阵、部署手册、路径语义文档和 Compose 配置回归测试。
+- 已核对 `@fastagent/sandbox-runtime@0.5.2` 发布包和其 `@anthropic-ai/sandbox-runtime@0.0.42` 依赖仍包含当前 wrapper 直接 patch 的内部 `dist/**` 文件。
+
 ## 2026-05-10
 
 ### Changed
