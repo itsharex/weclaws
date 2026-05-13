@@ -311,7 +311,7 @@
 
 ## Icons 图标
 
-**严禁使用 emoji**。用 Lucide via CDN（template.html 已引入）。
+**严禁使用 emoji**。用本地分发的 Lucide 资产（`index.html` 已通过 `./assets/lucide.min.js` 引入）。
 
 ```html
 <i data-lucide="compass" class="ico-lg"></i>     <!-- 大图标（pillar 用） -->
@@ -378,17 +378,15 @@
 
 ### 加载方式
 
-`assets/template.html` 底部的 module script 会先尝试**本地** `assets/motion.min.js`,失败则回落到 **jsdelivr CDN**,两者都失败则强制把所有带 `data-anim` 的元素设为 `opacity:1`—— 内容永远可读,演示不依赖网络。
+`index.html` 底部的 module script 只会尝试**本地** `assets/motion.min.js`;如果本地资产缺失或加载失败,脚本会强制把所有带 `data-anim` 的元素设为 `opacity:1`—— 内容永远可读,演示不依赖网络。
 
 ```js
 // template 里的核心加载器(不用改)
 let motion;
 try { motion = await import('./assets/motion.min.js'); }
-catch(e1) {
-  try { motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm'); }
-  catch(e2) {
-    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
-  }
+catch(error) {
+  console.warn('[motion] local asset failed, disabling animations', error);
+  document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
 }
 ```
 

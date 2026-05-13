@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>[必填] 替换为 PPT 标题 · Deck Title</title>
+<link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Crect width="64" height="64" rx="12" fill="%230a0a0a"/%3E%3Ccircle cx="32" cy="32" r="14" fill="%23ffffff"/%3E%3C/svg%3E'>
 <style>
   /* Core Latin font subsets are inlined so the deck stays usable without Google Fonts.
      Chinese glyphs continue to use system fallback stacks. */
@@ -147,7 +148,7 @@
   .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
   .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
 
-  /* ============ Icons（Lucide via CDN） ============ */
+  /* ============ Icons（Lucide local asset） ============ */
   .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
   .ico-lg,.ico-md,.ico-sm{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
   .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block}
@@ -421,7 +422,7 @@
      - quote(含 [data-anim="line"]):逐行 600ms 淡入
      - directional(含 [data-anim="left|right"]):左→分隔线→右
      - pipeline(data-animate="pipeline"):Space/→ 手动推进
-     Motion One 没加载成功时(CDN 断 + 本地丢),所有 [data-anim] 会兜底显示。
+     Motion One 本地资产没加载成功时,所有 [data-anim] 会兜底显示。
   */
   [data-anim]{opacity:1}
   body.motion-ready [data-anim]{opacity:0}
@@ -735,27 +736,29 @@ addEventListener('touchend',e=>{
 
 go(0);
 </script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>lucide.createIcons();</script>
+<script src="./assets/lucide.min.js"></script>
+<script>
+if (window.lucide && typeof window.lucide.createIcons === 'function') {
+  window.lucide.createIcons();
+} else {
+  console.warn('[lucide] local asset missing, icons will not render');
+}
+</script>
 
-<!-- ============ Motion One 动效引擎（本地优先,CDN 兜底） ============
-     加载策略:先 ./assets/motion.min.js(本地,离线可用),失败 fallback 到 jsDelivr CDN
+<!-- ============ Motion One 动效引擎（本地资产） ============
+     加载策略:只加载 ./assets/motion.min.js；本地文件缺失时直接降级为静态可读模式
      加载完成后挂 window.__playSlide / window.__pipeAdvance,
      导航脚本会在翻页中段调用 __playSlide(idx),键盘/滚轮/触屏会在翻页前调用 __pipeAdvance()
-     双双失败时会兜底把所有 [data-anim] 设为可见,不让动效破坏阅读
+     本地加载失败时会兜底把所有 [data-anim] 设为可见,不让动效破坏阅读
 -->
 <script type="module">
 let motion;
 try {
   motion = await import('./assets/motion.min.js');
-} catch(e1) {
-  try {
-    motion = await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm');
-  } catch(e2) {
-    console.warn('[motion] local + CDN both failed, disabling animations', e1, e2);
-    document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
-    document.querySelectorAll('[data-animate="pipeline"] [data-anim]').forEach(el=>el.style.opacity='1');
-  }
+} catch(error) {
+  console.warn('[motion] local asset failed, disabling animations', error);
+  document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});
+  document.querySelectorAll('[data-animate="pipeline"] [data-anim]').forEach(el=>el.style.opacity='1');
 }
 
 if(motion){

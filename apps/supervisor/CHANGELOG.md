@@ -9,6 +9,8 @@
 - `agent-browser` skill 现已补充 Browserless direct 的场景划分：一次性截图、PDF、scrape 等 one-shot 任务可直接走 Browserless，但当前不单独拆托管 Browserless skill。
 - 新增托管收编版 `ppt-skill`：已纳入 `resources/skills/managed` 与 `index.json`，但暂不加入 `manifest.json` 默认同步清单；收编版已统一成 WeClaws 口径，保留模板、参考资料和 Node 校验脚本，并把预览边界明确为“生成产物优先，不依赖 remote sandbox 内的本地浏览器路径”。
 - `ppt-skill` 两套模板已补上离线字体策略：内嵌关键拉丁字形，中文继续走系统字体栈，避免 Google Fonts 不稳定导致远程预览、截图或本地离线打开时版式漂移。
+- `ppt-skill` 交付契约现已进一步收紧为本地分发：生成 deck 时必须同级携带 `assets/motion.min.js` 与 `assets/lucide.min.js`，模板不再依赖 `unpkg` / `jsDelivr` 这类外网运行时 CDN。
+- `ppt-skill` 两套模板现已内联默认 favicon，静态预览不再额外请求 `/favicon.ico`，避免本地 HTTP smoke 或远程截图链路出现无意义的 404 控制台噪音。
 
 ## 2026-05-11
 

@@ -7,7 +7,7 @@
 ## 使用方法
 
 1. 问用户选哪套（或基于内容推荐一套）
-2. 打开 `assets/template-swiss.html` 的 `<style>` 块
+2. 打开你正在交付的 `项目/XXX/ppt/index.html` 的 `<style>` 块
 3. 找到开头的 `:root{` 块
 4. **整体替换**标有"主题色"注释的所有变量：`--paper` / `--paper-rgb` / `--ink` / `--ink-rgb` / `--grey-1` / `--grey-2` / `--grey-3` / `--accent` / `--accent-rgb` / `--accent-on`
 5. 其他 CSS 都走 `var(--...)`,无需任何其他改动

@@ -26,7 +26,7 @@ description: 当用户需要制作分享、演讲、发布会风格的单文件 
 - 模板：`assets/template-swiss.html` · 主题色：`references/themes-swiss.md` · 布局：`references/layouts-swiss.md`
 - 美学锚点：像 Massimo Vignelli + Helvetica Forever
 
-**两种风格共享**：横向翻页（键盘 ← →、滚轮、触屏、ESC 索引）、Lucide 图标、内嵌关键西文字体、中文系统字体栈、Motion One 入场动效（本地 + CDN 双保险）。
+**两种风格共享**：横向翻页（键盘 ← →、滚轮、触屏、ESC 索引）、Lucide 图标、内嵌关键西文字体、中文系统字体栈、Motion One 入场动效（本地分发，可离线运行）。
 
 ## 何时使用
 
@@ -130,19 +130,23 @@ description: 当用户需要制作分享、演讲、发布会风格的单文件 
 
 ### Step 2 · 拷贝模板
 
-**根据 Step 1 选定的风格,拷贝对应的模板**到目标位置（通常是 `项目/XXX/ppt/index.html`），同时在同级建一个 `images/` 文件夹准备接图片。
+**根据 Step 1 选定的风格,拷贝对应的模板**到目标位置（通常是 `项目/XXX/ppt/index.html`），同时在同级准备 `images/` 和 `assets/` 两个目录。`assets/` 必须和 `index.html` 同级存在,因为模板会从那里读取本地 `motion` / `lucide` 运行时文件。
 
 ```bash
-mkdir -p "项目/XXX/ppt/images"
+mkdir -p "项目/XXX/ppt/images" "项目/XXX/ppt/assets"
 
 # 风格 A · 电子杂志风
 cp "<SKILL_ROOT>/assets/template.html" "项目/XXX/ppt/index.html"
 
 # 或 风格 B · 瑞士国际主义风
 cp "<SKILL_ROOT>/assets/template-swiss.html" "项目/XXX/ppt/index.html"
+
+# 两种风格都要带上本地运行时资产
+cp "<SKILL_ROOT>/assets/motion.min.js" "项目/XXX/ppt/assets/motion.min.js"
+cp "<SKILL_ROOT>/assets/lucide.min.js" "项目/XXX/ppt/assets/lucide.min.js"
 ```
 
-两个 `template*.html` 都是**完整可运行**的文件——CSS、WebGL shader、翻页 JS、关键西文字体内嵌、中文系统字体栈与图标脚本都已预设好,只有 `<!-- SLIDES_HERE -->` 占位符等待你填充 slide 内容。
+两个 `template*.html` 都是**完整可运行**的种子文件——CSS、WebGL shader、翻页 JS、关键西文字体内嵌、中文系统字体栈与图标脚本都已预设好,只有 `<!-- SLIDES_HERE -->` 占位符等待你填充 slide 内容。最终交付目录的最小结构是 `index.html + images/ + assets/`；不要把 `assets/` 改名,也不要把 `motion.min.js` / `lucide.min.js` 挪走。
 
 **注意**:风格 A 和 B **不能混用**。layouts.md 里的类（如 `.h-hero` 衬线大标题、`.display-zh` 等）只在 template.html 有定义；layouts-swiss.md 里的类（如 `.kpi-hero`、`.accent-block`、`.span-N`、`.dots` 等）只在 template-swiss.html 有定义。一份 deck 只能选一套。
 
@@ -154,7 +158,7 @@ cp "<SKILL_ROOT>/assets/template-swiss.html" "项目/XXX/ppt/index.html"
 |------|------|--------|
 | `<title>` | `[必填] 替换为 PPT 标题 · Deck Title` | 实际 deck 标题(如 `一种新的工作方式 · Luke Wroblewski`) |
 
-每次拷贝完 template.html 第一件事:grep 一下"[必填]" 确认全部替换完。
+每次拷贝完 `index.html` 第一件事:grep 一下"[必填]" 确认全部替换完。
 
 #### 2.2 · 选定主题色(5 套预设 · 不允许自定义)
 
@@ -171,7 +175,7 @@ cp "<SKILL_ROOT>/assets/template-swiss.html" "项目/XXX/ppt/index.html"
 **操作**:
 1. 基于内容主题推荐一套,或直接问用户选哪一套
 2. 打开 `references/themes.md`,找到对应主题的 `:root` 块
-3. **整体替换** `assets/template.html`(已拷贝版本)开头 `:root{` 块里标有"主题色"注释的那几行(`--ink` / `--ink-rgb` / `--paper` / `--paper-rgb` / `--paper-tint` / `--ink-tint`)
+3. **整体替换** `项目/XXX/ppt/index.html` 开头 `:root{` 块里标有"主题色"注释的那几行(`--ink` / `--ink-rgb` / `--paper` / `--paper-rgb` / `--paper-tint` / `--ink-tint`)
 4. 其他 CSS 都走 `var(--...)`,无需任何其他改动
 
 **硬规则**:
@@ -192,9 +196,7 @@ cp "<SKILL_ROOT>/assets/template-swiss.html" "项目/XXX/ppt/index.html"
 
 **在写任何 slide 代码之前:**
 
-1. **先 Read 当前用的模板**(至少读到 `<style>` 块末尾):
-   - 风格 A → `assets/template.html`
-   - 风格 B → `assets/template-swiss.html`
+1. **先 Read 当前正在编辑的 deck 文件**(通常是 `项目/XXX/ppt/index.html`,至少读到 `<style>` 块末尾)
 2. **对照对应 layouts 文件的 Pre-flight 列表**,确认你要用的每个类都在 `<style>` 里存在
 3. 如果某个类缺失:**在模板的 `<style>` 里补上**,不要在每个 slide 里 inline 重写
 4. **模板是唯一的类名来源**——不要发明新类名,如需自定义用 `style="..."` inline
@@ -410,7 +412,12 @@ ppt-skill/
 ├── assets/
 │   ├── template.html         ← 风格 A · 电子杂志风模板（种子文件）
 │   ├── template-swiss.html   ← 风格 B · 瑞士国际主义风模板（种子文件）
-│   └── motion.min.js         ← Motion One 本地副本（离线兜底,约 64KB,共用）
+│   ├── motion.min.js         ← Motion One 本地副本（离线兜底,约 64KB,共用）
+│   └── lucide.min.js         ← Lucide 本地副本（离线图标渲染）
+├── licenses/
+│   ├── lucide-LICENSE.txt    ← Lucide 许可证文本
+│   └── motion-LICENSE.md     ← Motion 许可证文本
+├── THIRD_PARTY_NOTICES.md    ← Vendored runtime assets 来源说明
 ├── scripts/
 │   └── validate-swiss-deck.mjs ← 风格 B 静态校验:登记版式、图片槽位、SVG 文本、标题对齐
 └── references/
@@ -429,9 +436,7 @@ ppt-skill/
 2. Step 1 需求澄清**第一问**先确定风格 A 还是 B,然后:
    - 风格 A:读 `themes.md` 帮用户选一套主题色
    - 风格 B:读 `themes-swiss.md` 帮用户选一套主题色
-3. **动手前 Read 对应模板的 `<style>` 块**——这是类名的唯一来源,缺类会导致整页样式崩
-   - 风格 A → `assets/template.html`
-   - 风格 B → `assets/template-swiss.html`
+3. **动手前 Read 生成后的 `项目/XXX/ppt/index.html` 的 `<style>` 块**——这是当前 deck 类名的唯一来源,缺类会导致整页样式崩
 4. 读对应的 layouts 文件挑布局:
    - 风格 A → `layouts.md`(顶部有 Pre-flight 类名清单、主题节奏规划、动效 recipe 决策树)
    - 风格 B → **先读 `swiss-layout-lock.md`**,再读 `layouts-swiss.md`;正文页必须从 S01-S22 选择,每页写 `data-layout`
@@ -439,7 +444,7 @@ ppt-skill/
 6. 细节调整时读 `components.md` 查组件(含 Motion 动效系统章节,主要服务风格 A;风格 B 的组件细节在 `layouts-swiss.md` 附录)
 7. 生成后先运行 `node scripts/validate-swiss-deck.mjs path/to/index.html`,再读 `checklist.md` 自检
 
-**动效相关**:模板已把 Motion One 的加载和 recipe 逻辑内嵌到底部 module script。你不需要改 JS,只需要按 `layouts.md` / `layouts-swiss.md` 的骨架在 HTML 里加 `data-anim` / `data-animate` 即可。离线演示靠 `assets/motion.min.js`,断网时自动降级为"无动画但内容可读"。风格 B 模板必须保留 `B` 键低功耗模式:切换后停止 WebGL/ASCII canvas RAF,取消正在运行的 Web Animations,并把当前页内容直接 reveal 到静态最终态。
+**动效相关**:模板已把 Motion One 的加载和 recipe 逻辑内嵌到底部 module script。你不需要改 JS,只需要按 `layouts.md` / `layouts-swiss.md` 的骨架在 HTML 里加 `data-anim` / `data-animate` 即可。离线演示依赖同级 `assets/motion.min.js` 和 `assets/lucide.min.js`;本地资产缺失时会直接降级为"无动画 / 无图标但内容可读"。风格 B 模板必须保留 `B` 键低功耗模式:切换后停止 WebGL/ASCII canvas RAF,取消正在运行的 Web Animations,并把当前页内容直接 reveal 到静态最终态。
 
 ## 核心设计原则
 

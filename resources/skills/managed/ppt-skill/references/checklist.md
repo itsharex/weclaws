@@ -201,7 +201,7 @@ node <SKILL_ROOT>/scripts/validate-swiss-deck.mjs path/to/index.html
 **根因**：如果当前模板的 `<style>` 里没有这些类的定义,浏览器就 fallback 到默认样式。
 
 **做法**：
-- **生成 PPT 前,必须先 `Read` 当前风格对应模板**:风格 A 读 `assets/template.html`,风格 B 读 `assets/template-swiss.html`,确认 layouts 里用到的类都已定义
+- **生成 PPT 前,必须先 `Read` 当前正在编辑的 `项目/XXX/ppt/index.html`**，确认 layouts 里用到的类都已定义
 - 最常见遗漏的类:`h-hero / h-xl / h-sub / h-md / lead / meta-row / stat-card / stat-label / stat-nb / stat-unit / stat-note / pipeline-section / pipeline-label / pipeline / step / step-nb / step-title / step-desc / grid-2-7-5 / grid-2-6-6 / grid-2-8-4 / grid-3-3 / frame / img-cap / callout-src`
 - 如果某个类确实缺了,**在模板的 `<style>` 里补上**,不要在每页 inline 重写
 - 生成后打开浏览器,如果看到"大标题是非衬线"或"pipeline 步骤挤在一行",几乎 100% 是这个问题
@@ -210,14 +210,18 @@ node <SKILL_ROOT>/scripts/validate-swiss-deck.mjs path/to/index.html
 
 **现象**：在中式杂志风格里用 emoji（🎯 💡 ✅）会立刻破坏格调。
 
-**做法**：用 Lucide 图标库，CDN 方式引用：
+**做法**：用 Lucide 图标库，本地方式引用：
 
 ```html
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="./assets/lucide.min.js"></script>
 ...
 <i data-lucide="target" class="ico-md"></i>
 ...
-<script>lucide.createIcons();</script>
+<script>
+if (window.lucide && typeof window.lucide.createIcons === 'function') {
+  window.lucide.createIcons();
+}
+</script>
 ```
 
 常用图标名：`target / palette / search-check / compass / share-2 / crown / check-circle / x-circle / plus / arrow-right / grid-2x2 / network`
@@ -511,7 +515,8 @@ JS 会动态算总页数并扩展底部翻页圆点，但 `.chrome` 里的 `XX /
   □ B 键触发静态/低功耗模式,右下角提示在 `B 静态` / `B 动态` 之间切换
 
 动效
-  □ `assets/motion.min.js` 存在(本地兜底)
+  □ `assets/motion.min.js` 存在(本地动效资产)
+  □ `assets/lucide.min.js` 存在(本地图标资产)
   □ 低功耗模式下 WebGL/ASCII canvas 不再挂 RAF 循环,当前页内容仍全部可见
   □ 翻页时内容逐个淡入,不是"啪"一下全出
   □ 大引用页 `<section>` 带 `data-animate="quote"`,每行 `<span data-anim="line">`
