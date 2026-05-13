@@ -76,10 +76,7 @@ FastAgent CLI 还对 OpenAI Chat Completions 兼容接口下的 Kimi K2（`kimi-
 
 ## 背后的执行能力
 
-WeClaws 当前集成：
-
-- `@fastagent/cli@0.6.50`
-- `@fastagent/sandbox-runtime@0.5.2`
+WeClaws 基于 [`@fastagent/cli`](https://www.npmjs.com/package/@fastagent/cli) 和 [`@fastagent/sandbox-runtime`](https://www.npmjs.com/package/@fastagent/sandbox-runtime) 构建。具体版本、升级节奏和最新能力说明，建议直接查看对应 npm 页面或仓库内的版本矩阵手册。
 
 [`@fastagent/cli`](https://www.npmjs.com/package/@fastagent/cli) 是用户真正使用的智能体运行时，更完整的命令、配置和能力说明可以查看它的 npm 页面。当前公开能力包括：
 
@@ -152,8 +149,10 @@ WeClaws 内置一组官方托管技能，来源位于 `resources/skills/managed`
 | `video-frames` | 用 ffmpeg 从视频中截帧或生成检查图 | `ffmpeg` |
 | `personal-planner` | 面向复杂任务的先规划、再执行工作流 | 无额外命令依赖 |
 | `agent-browser` | 浏览器自动化技能说明已收编，默认走 Browserless sidecar | `agent-browser`、Browserless sidecar |
+| `ppt-skill` | 生成 HTML 网页 PPT，并交付本地可预览的 deck 资源目录 | `node` |
+| `editorial-card-screenshot` | 生成 editorial 风格信息卡，并通过远程 Browserless 导出 PNG | `curl`、`python3`、Browserless sidecar |
 
-技能是否真正可用，还取决于运行环境里是否具备对应命令和授权。例如 GitHub 技能需要可用的 `gh` 认证上下文；用户级密钥和 OAuth 状态不会内置进镜像。
+技能是否真正可用，还取决于运行环境里是否具备对应命令和授权。例如 GitHub 技能需要可用的 `gh` 认证上下文；`ppt-skill` 依赖 `node` 执行校验脚本；`editorial-card-screenshot` 的截图导出依赖 Browserless 远程路径；用户级密钥和 OAuth 状态不会内置进镜像。
 
 ## WeClaws 和 FastAgent 的分工
 
@@ -188,8 +187,8 @@ flowchart LR
 
 要求：
 
-- Node.js 20，推荐 20.18.1
-- pnpm 9.15.4
+- Node.js 20+
+- pnpm
 - 一个可用的模型服务 API 密钥，登录后在网页控制台创建用户级模型配置
 
 ```bash

@@ -6,6 +6,10 @@
       "path": "agent-browser"
     },
     {
+      "name": "ppt-skill",
+      "path": "ppt-skill"
+    },
+    {
       "name": "editorial-card-screenshot",
       "path": "editorial-card-screenshot"
     },

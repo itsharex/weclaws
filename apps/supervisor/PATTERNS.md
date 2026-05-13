@@ -95,7 +95,7 @@
 - Compose 默认还会提供 `browserless` sidecar 作为受支持的远程浏览器后端；浏览器自动化的产品路径固定为 `sandbox-runtime` 内的 `agent-browser -p browserless` 或显式远程 `--cdp` 连接远程浏览器后端，不再支持在 nested sandbox 内直接 launch 本地 Chromium
 - 一次性截图、PDF、scrape 这类 one-shot 远程浏览器任务可以直接调用 Browserless；但当前托管 skill 仍统一放在 `agent-browser` 下，不额外拆分 Browserless skill
 - 如果 Browserless 或远程 CDP 连接不可用，browser automation 必须直接报阻塞；不要回退到本地浏览器启动、本地浏览器安装或宿主机浏览器会话
-- `ppt-skill` 当前已收编到 managed bundle，但不进入默认同步清单；其主要产物是 bot workspace 内同级交付的 `index.html`、`images/`、`assets/` 目录，预览不应依赖 remote sandbox 内的 `file://` 本地浏览器路径；`assets/` 至少包含本地 `motion.min.js` 与 `lucide.min.js`，模板不得再依赖外网 CDN；模板内嵌关键拉丁字形，中文继续走系统字体栈，不把整包 CJK 字体打进托管 skill，并应内联默认 favicon，避免静态预览链路额外打出 `/favicon.ico` 404
+- `ppt-skill` 当前已进入 managed bundle 默认同步清单；其主要产物是 bot workspace 内同级交付的 `index.html`、`images/`、`assets/` 目录，预览不应依赖 remote sandbox 内的 `file://` 本地浏览器路径；`assets/` 至少包含本地 `motion.min.js` 与 `lucide.min.js`，模板不得再依赖外网 CDN；模板内嵌关键拉丁字形，中文继续走系统字体栈，不把整包 CJK 字体打进托管 skill，并应内联默认 favicon，避免静态预览链路额外打出 `/favicon.ico` 404
 - `editorial-card-screenshot` 当前已进入 managed bundle 默认同步清单；其截图链路固定为 Browserless direct：skill 侧只允许用 `curl + python3` 把自包含 HTML 提交到远程 `/screenshot` API，不允许本地 Chrome / Chromium、宿主机浏览器或 `file://` 路径回退；如果卡片依赖图片或图标，必须内联或使用远程可访问资源
 - repo-local `sandbox-runtime` 镜像入口固定走 `infra/sandbox-runtime/entry.mjs` manager；manager 读取 `srt-pools.json`，按 enabled user pool 启停 `srt-child-entry.mjs`
 - sandbox-runtime manager 的 `/health` 必须返回最近一次 `srt-pool-status.json` 同源的聚合状态；单个 user pool `starting` / `degraded` / `failed` 时 manager 可以保持 HTTP 200，但 body 里的 `state` 必须反映降级。

@@ -1,5 +1,5 @@
 {
-  "version": "2026-05-13-curated-v9",
+  "version": "2026-05-13-curated-v10",
   "skills": [
     {
       "name": "agent-browser",
@@ -151,7 +151,7 @@
     {
       "name": "ppt-skill",
       "path": "ppt-skill",
-      "defaultSync": false,
+      "defaultSync": true,
       "homepage": "https://github.com/op7418/guizang-ppt-skill",
       "emoji": "🖼️",
       "requires": {

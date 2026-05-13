@@ -39,6 +39,24 @@ describe('ppt-skill bundle contract', () => {
     expect(magazineThemes).not.toContain('打开 `assets/template.html`');
     expect(swissThemes).not.toContain('打开 `assets/template-swiss.html`');
   });
+
+  it('is present in the default-sync managed bundle', async () => {
+    const managedRoot = new URL('../', PPT_SKILL_ROOT);
+    const index = JSON.parse(await readFile(new URL('index.json', managedRoot), 'utf8')) as {
+      skills: Array<{ name: string; defaultSync?: boolean }>;
+    };
+    const manifest = JSON.parse(await readFile(new URL('manifest.json', managedRoot), 'utf8')) as {
+      skills: Array<{ name: string }>;
+    };
+
+    const skillEntry = index.skills.find((entry) => entry.name === 'ppt-skill');
+
+    expect(skillEntry).toMatchObject({
+      name: 'ppt-skill',
+      defaultSync: true,
+    });
+    expect(manifest.skills.map((entry) => entry.name)).toContain('ppt-skill');
+  });
 });
 
 function readText(relativePath: string) {
