@@ -3,7 +3,7 @@
   <h2>
     WeClaws
   </h2>
-  <p><strong>一键部署、多用户注册、统一托管微信智能体机器人</strong></p>
+  <p><strong>一键部署、多用户、可长期托管的微信 AI 智能体控制台</strong></p>
   <p>
     <a href="https://github.com/baseclaw/weclaws"><img alt="GitHub stars" src="https://img.shields.io/github/stars/baseclaw/weclaws?style=social" /></a>
     <a href="https://www.npmjs.com/package/@fastagent/cli"><img alt="@fastagent/cli" src="https://img.shields.io/npm/v/%40fastagent%2Fcli?label=%40fastagent%2Fcli" /></a>
@@ -16,34 +16,50 @@
   <img src="assets/poster.jpg" alt="WeClaws Web管理面板" width="100%" />
 </p>
 
-WeClaws 是一个可一键部署的**多用户**微信AI机器人WEB管理面板。基于 FastAgent CLI 接入微信对话通道，支持工具调用、技能、MCP、记忆、做梦、定时任务和沙盒执行能力。
+WeClaws 是一个面向 **团队、多账号、按用户沙盒隔离和长期运行** 场景的微信 AI 智能体控制台。它把微信通道、工具调用、Skills、MCP、记忆、定时任务和沙盒能力，包装成一个可通过 Web 管理、可多用户注册、可持续托管的控制面。
 
-通过在云端或者本地服务器部署，用户就可以通过网页注册/登录、配置模型服务、创建自己的微信机器人、扫码登录微信，并让机器人长期在线运行。
+> Self-hosted multi-user WeChat AI agent control plane with a web console, Docker Compose deployment, managed skills, sandboxed tools, and FastAgent runtime.
 
-系统内置用户账号、邀请码注册、Bot快速分享、模型配置、状态实时刷新、机器人生命周期管理和按用户隔离的远程沙盒。
+如果你要的不是“本地手工跑一个机器人脚本”，而是“部署一次后，让多个用户各自管理、分享、登录并长期运行自己的微信 AI 机器人”，WeClaws 更接近这个答案。
 
-简单说：
+- [3 分钟快速开始](#快速开始)
+- [Docker Compose 一键部署](#docker-compose-一键部署)
+- [查看项目分工](#weclaws-和-fastagent-的分工)
+- [托管技能清单](#托管技能同步)
+- [部署与运维文档](docs/manuals/README.md)
 
-- Docker Compose 可以一次拉起网页、supervisor、沙盒运行时和 `browserless`。
-- WeClaws 提供多用户账号、注册邀请、模型配置、机器人管理和实时状态。
-- `@fastagent/cli` 负责真正的微信机器人对话和工具执行。
-- `@fastagent/sandbox-runtime` 提供按用户隔离的远程执行环境。
-- Supervisor 在后台把网页里的运行意图变成真实 FastAgent 子进程。
+如果这个方向对你有帮助，欢迎点个 Star，后续功能和部署实践会持续公开。
 
 <p align="center">
   <img src="assets/wechat_1.jpg" alt="WeClaws 微信通道应用效果 1" width="48%" />
   <img src="assets/wechat_2.jpg" alt="WeClaws 微信通道应用效果 2" width="48%" />
 </p>
 
+## 为什么值得关注
+
+- **它是控制台，不是单机脚本。** WeClaws 提供用户账号、邀请码注册、模型配置、Bot 管理、Bot 快速分享、状态刷新和 Web 入口，适合真正交给多人使用。
+- **它面向长期运行，不是一次性演示。** 启动、扫码登录、运行状态、异常可见、重启和 supervisor 收敛都围绕持续托管设计。
+- **它强调隔离，不把所有 Bot 塞进同一执行环境。** `@fastagent/sandbox-runtime` 为不同用户准备独立的远程沙盒，降低工具执行互相影响的风险。
+- **它不是重造 AI 运行时。** `@fastagent/cli` 继续负责真正的微信对话和工具执行，WeClaws 专注多用户控制面和运维体验。
+
 ## 适合谁
 
-WeClaws 适合想把微信智能体从“手工跑一个命令”升级成“多人、多账号、可持续运维服务”的团队或个人：
+WeClaws 适合想把微信智能体从“手工命令行实验”升级成“可交付、可托管、可多人使用服务”的团队或个人：
 
 - 你想部署一次，就让多个用户在网页里创建和管理自己的机器人。
-- 你希望每个用户都有自己的微信机器人、模型配置、工作区和运行状态。
-- 你需要扫码登录、状态实时刷新、异常可见、实例可重启。
-- 你希望机器人的工具执行环境互相隔离，而不是所有账号共用同一个宿主机工作区。
-- 你想保留 FastAgent 引擎的完整能力，同时给非工程用户一个网页入口。
+- 你要给团队成员、客户或不同业务账号分别分配独立的微信 Bot。
+- 你需要扫码登录、状态实时刷新、异常可见、实例可重启，而不是靠手工盯日志。
+- 你希望把 Bot 通过二维码公开分享出去，让别人打开页面后直接扫码领取当前可用机器人。
+- 你希望每个用户都有自己的模型配置、工作区和运行状态，而不是共用一套宿主机上下文。
+- 你想保留 FastAgent 引擎的完整能力，同时给非工程用户一个 Web 管理入口。
+
+## 典型使用场景
+
+- 在云服务器上 self-host 一个多用户微信 AI 助手平台，供内部团队长期使用。
+- 为多个运营、销售、客服或项目成员分配各自独立的微信机器人。
+- 为单个 Bot 生成公开二维码分享页，别人无需登录 WeClaws 也能打开并在等待扫码时直接领取。
+- 让不同机器人绑定不同模型服务商、模型版本和 API 密钥，避免全局环境变量绑死。
+- 通过 Docker Compose 一次拉起网页、supervisor、沙盒运行时和 `browserless`，降低部署门槛。
 
 ## 你能用它做什么
 
@@ -51,6 +67,7 @@ WeClaws 适合想把微信智能体从“手工跑一个命令”升级成“多
 - 支持首个管理员自举、邀请码注册和多用户账号体系。
 - 为每个用户保存多条模型服务配置，让不同机器人绑定不同服务商、模型和 API 密钥。
 - 启动机器人后展示微信扫码登录二维码，登录状态通过 SSE 实时刷新。
+- 支持 Bot 二维码公开分享，别人打开分享页后可在 Bot 等待扫码时直接扫码领取，且分享页会自动刷新到最新二维码。
 - 停止、重启、查看运行状态，由 supervisor 统一管理实例生命周期。
 - 用 SQLite 保存用户、机器人、模型配置、运行意图和状态，不把内存当作事实来源。
 - 按用户分配远程沙盒进程池，让机器人在隔离环境中使用工具。
