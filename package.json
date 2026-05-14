@@ -2,7 +2,29 @@
   "name": "weclaws",
   "version": "0.2.1",
   "private": true,
+  "description": "Self-hosted 多用户微信 AI 智能体控制台，支持 Web 管理、Docker Compose、二维码分享、MCP、技能、沙盒执行和长期运行。",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baseclaw/weclaws.git"
+  },
+  "homepage": "https://github.com/baseclaw/weclaws#readme",
+  "bugs": {
+    "url": "https://github.com/baseclaw/weclaws/issues"
+  },
+  "keywords": [
+    "wechat",
+    "wechat-bot",
+    "weixin",
+    "ai-agent",
+    "self-hosted",
+    "docker-compose",
+    "mcp",
+    "sandbox",
+    "multi-user",
+    "bot-management"
+  ],
   "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": ">=20.0.0"

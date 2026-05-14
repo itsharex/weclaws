@@ -18,7 +18,7 @@
 
 WeClaws 是一个面向 **团队、多账号、按用户沙盒隔离和长期运行** 场景的微信 AI 智能体控制台。它把微信通道、工具调用、Skills、MCP、记忆、定时任务和沙盒能力，包装成一个可通过 Web 管理、可多用户注册、可持续托管的控制面。
 
-> Self-hosted multi-user WeChat AI agent control plane with a web console, Docker Compose deployment, managed skills, sandboxed tools, and FastAgent runtime.
+> Self-hosted WeChat AI agent control plane for teams that need multi-user access, per-user sandbox isolation, and long-running operations. It packages WeChat connectivity, tool calling, Skills, MCP, memory, scheduled tasks, and sandboxed execution into a web-managed, multi-user platform for durable hosting.
 
 如果你要的不是“本地手工跑一个机器人脚本”，而是“部署一次后，让多个用户各自管理、分享、登录并长期运行自己的微信 AI 机器人”，WeClaws 更接近这个答案。
 
