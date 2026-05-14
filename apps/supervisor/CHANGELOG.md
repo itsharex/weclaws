@@ -10,7 +10,9 @@
 ### Changed
 
 - `apps/supervisor` 依赖的 `better-sqlite3` 已升级到 `^12.10.0`，对齐 `better-auth@^1.6.11` 当前要求的 SQLite 驱动 peer baseline。
-- FastAgent CLI 事实文档与回归测试已重新对齐到当前 repo-local `@fastagent/cli@0.7.2`，避免 package metadata、manuals 和 compose-config contract 漂移。
+- repo-local FastAgent CLI 基线已升级到 `@fastagent/cli@0.7.4`，并同步更新 `pnpm-lock.yaml`、CLI contract、部署手册、版本矩阵和 Compose 配置回归测试。
+- Compose 默认 `sandbox-runtime` npm 基线已升级到 `@fastagent/sandbox-runtime@0.5.4`，并同步更新版本矩阵、部署手册、路径语义文档、PATTERNS 和 Compose 配置回归测试。
+- 已核对 `@fastagent/sandbox-runtime@0.5.4` 发布包和其 `@anthropic-ai/sandbox-runtime@0.0.42` 依赖仍包含当前 wrapper 直接 patch 的内部 `dist/**` 文件。
 
 ## 2026-05-12
 
