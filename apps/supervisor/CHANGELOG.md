@@ -4,6 +4,8 @@
 
 ### Changed
 
+- 已重新核对 `@fastagent/sandbox-runtime@0.5.6` 发布包与上游源码；WeClaws 当前依赖的 `WorkspaceManager`、`SandboxProcessPool`、`SandboxAPI` 以及 `@anthropic-ai/sandbox-runtime` `sandbox-manager` patch 点仍保持兼容，因此这次只同步事实文档和 Compose 配置回归测试。
+- repo-local FastAgent CLI 的事实文档与 Compose 配置回归测试现已对齐到 `@fastagent/cli@0.8.0`。
 - `sandbox-runtime` 镜像构建基线现在固定预装官方 `@larksuite/cli@1.0.32`，并通过新的 `LARK_CLI_NPM_VERSION` build arg 暴露版本钉住入口；Compose、版本矩阵与部署手册已同步更新。
 - managed skills 默认同步清单现在纳入官方公开的 Feishu/Lark 24-skill bundle：`lark-*` 目录按 upstream-vendored 方式完整收编，保留 `references/`、`scripts/`、`assets/` 等运行资料，不包含未进入官方公开 catalog 的 `lark-vc-agent`。
 
