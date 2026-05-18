@@ -28,8 +28,8 @@ importers:
   apps/supervisor:
     dependencies:
       '@fastagent/cli':
-        specifier: 0.7.5
-        version: 0.7.5
+        specifier: 0.8.0
+        version: 0.8.0
       '@weclaws/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -1103,8 +1103,8 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@fastagent/cli@0.7.5':
-    resolution: {integrity: sha512-uQl9EpkqlBJSyR4fn63qmpMg3oTSX1g99BM4N0yYVgbBLyPCx8HBJ0q6U3eiX0zz7GlqLclnSwZXnT+yPiyXgA==}
+  '@fastagent/cli@0.8.0':
+    resolution: {integrity: sha512-Ql2XBFJE9pXxy2sDsrospcnzfz5hyJpZN6N/UDgC5f+XLpzQ7FFlURs3fMdB8Y0qTBtO9cJJe6B85erUi++xWg==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -3748,7 +3748,7 @@ snapshots:
       '@noble/hashes': 2.0.1
     optional: true
 
-  '@fastagent/cli@0.7.5': {}
+  '@fastagent/cli@0.8.0': {}
 
   '@floating-ui/core@1.7.5':
     dependencies:
