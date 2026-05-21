@@ -8,7 +8,6 @@ import type { LlmProfileItem } from '@/lib/llm-profiles';
 import { BotDetailHeader } from './bot-detail-header';
 import { BotEventsList } from './bot-events-list';
 import { BotQrSharePanel } from './bot-qr-share-panel';
-import { BotWorkspacePreviews } from './bot-workspace-previews';
 
 interface BotDetailLiveViewProps {
   initialBot: BotDetailItem;
@@ -84,7 +83,6 @@ export function BotDetailLiveView({ initialBot, initialEvents, profiles }: BotDe
           <BotEventsList events={events} />
         </section>
       </div>
-      <BotWorkspacePreviews />
     </div>
   );
 }

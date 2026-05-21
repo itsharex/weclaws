@@ -241,11 +241,6 @@ export const messages = {
       profileSwitchFailed: '切换 LLM Profile 失败。',
       activityRegion: '实时活动',
       controlsRegion: 'Bot 控制台',
-      sessionsPreviewTitle: '会话预览',
-      sessionsPreviewDescription: '后续会在这里展示机器人最近会话、消息摘要和接管入口。',
-      workspaceFilesPreviewTitle: '工作区文件预览',
-      workspaceFilesPreviewDescription: '后续会在这里展示机器人工作区文件、产物和可预览内容。',
-      previewComingSoon: '预留区域',
     },
     adminInvites: {
       pageTitle: '邀请码管理',
@@ -566,11 +561,6 @@ export const messages = {
       profileSwitchFailed: 'Profile switch failed.',
       activityRegion: 'Live Activity',
       controlsRegion: 'Bot Controls',
-      sessionsPreviewTitle: 'Sessions Preview',
-      sessionsPreviewDescription: 'Recent bot conversations, message summaries, and handoff entry points will appear here later.',
-      workspaceFilesPreviewTitle: 'Workspace Files Preview',
-      workspaceFilesPreviewDescription: 'Workspace files, generated artifacts, and previewable outputs will appear here later.',
-      previewComingSoon: 'Reserved area',
     },
     adminInvites: {
       pageTitle: 'Invite Management',

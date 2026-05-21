@@ -185,7 +185,6 @@
 - 详情页工作区现在固定为“双栏主次结构”：
   - 左栏是 `Bot Controls` complementary region，用于二维码与分享模块
   - 右栏是 `Live Activity` region，用于最近事件
-- bot 详情页的会话预览和工作区文件预览当前是静态预留区，不读取文件系统、不新增 session/file API，也不改变 [`src/components/bots/bot-detail-live-view.tsx`](./src/components/bots/bot-detail-live-view.tsx) 作为唯一 EventSource owner 的边界
 - [`src/components/bots/bot-qr-share-panel.tsx`](./src/components/bots/bot-qr-share-panel.tsx) 是详情页二维码与分享的唯一 owner 侧模块：只在 `waiting_for_qr` 展示当前二维码，提供确认后的 `Reissue QR` intent，并组合 [`src/components/bots/bot-qr-share-controls.tsx`](./src/components/bots/bot-qr-share-controls.tsx) 的公开分享开关和复制链接；该模块在左侧控制栏内必须保持单列满宽流，不要在模块内部再拆二维码/分享两列并排
 - [`src/components/bots/qr-code-panel.tsx`](./src/components/bots/qr-code-panel.tsx) 在详情页内使用 compact 模式，二维码区域只保留当前二维码、二维码 ID 和同一行动作组，不重复渲染模块标题、来源说明或预览说明；`Open QR page` 与 `Reissue QR` 必须放在同一个 actions group 中，窄屏允许自动换行
 - 详情页二维码只在 `status=waiting_for_qr` 时展示；即使数据库里仍保留最近一次 `lastQrCode*`，bot 进入 `running` / `degraded` / `stopped` 后也不能继续把旧二维码展示给用户
